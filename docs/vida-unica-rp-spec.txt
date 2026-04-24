@@ -1,0 +1,3317 @@
+PROJETO: VIDA ÚNICA RP
+TIPO: Roleplay textual hardcore, mobile-first, com botões clicáveis, cidade viva, jogadores como prioridade e NPC apenas como solução de fallback.
+
+====================================================================
+1. VISÃO GERAL DO JOGO
+====================================================================
+
+Vida Única RP é um jogo de roleplay textual hardcore feito para navegador/mobile, com aparência de aplicativo de jogo.
+
+O jogo deve funcionar como uma cidade viva, onde jogadores assumem papéis sociais, profissionais, criminais, políticos e institucionais. A experiência deve ser séria, imersiva e baseada em consequências reais.
+
+A regra central do jogo é:
+
+"Cada personagem possui uma única vida. Se morrer definitivamente, perde tudo."
+
+A conta do usuário continua existindo, mas o personagem morto não volta. O jogador precisa criar um novo personagem do zero.
+
+O jogo não deve parecer um fórum, uma planilha ou um chat antigo. Deve parecer um app mobile de jogo, com tela cheia, cards, botões grandes, ícones, menus inferiores, notificações e interface amigável para celular.
+
+O jogador não deve depender de comandos de texto como /me, /diz, /grita etc. O jogo deve funcionar principalmente por botões clicáveis, menus contextuais e caixas de fala simples.
+
+====================================================================
+2. FILOSOFIA CENTRAL DO VIDA ÚNICA RP
+====================================================================
+
+O jogo deve seguir estas regras de design:
+
+1. Jogadores movem a cidade.
+2. NPCs apenas impedem o jogo de travar.
+3. Toda ação importante deve ser feita por botão.
+4. Toda ação grave deve gerar log.
+5. Toda profissão deve ter utilidade real.
+6. Até funções pequenas devem importar.
+7. O chat deve ser uma linha do tempo da cena, não um terminal de comandos.
+8. O sistema deve calcular risco, medo, pressão, ferimentos e consequências.
+9. Morte definitiva deve existir, mas não pode ser banal.
+10. O jogo deve ser hardcore: viver já deve ser uma conquista.
+
+Frase de design:
+
+"O jogador escolhe. O sistema calcula. A cidade reage."
+
+Outra frase importante:
+
+"Quem não está no local, não sabe. Quem não viu, não prova. Quem age, deixa rastro."
+
+====================================================================
+3. PLATAFORMA E TECNOLOGIA
+====================================================================
+
+O projeto deve ser feito usando:
+
+- GitHub para versionamento do código.
+- Railway para deploy da aplicação.
+- PostgreSQL no Railway para banco de dados.
+- Frontend mobile-first.
+- Backend com API.
+- Sistema em tempo real para atualizar locais, chats, ações e notificações.
+
+Stack recomendada:
+
+Frontend:
+- React
+- Vite
+- TypeScript
+- CSS/Tailwind ou CSS modular
+- Interface mobile-first
+- Futuramente pode virar PWA instalável
+
+Backend:
+- Node.js
+- TypeScript
+- Fastify ou Express
+- Prisma ORM
+- PostgreSQL
+- SSE ou WebSocket para tempo real
+
+Banco:
+- PostgreSQL no Railway
+
+Deploy:
+- Railway com serviços separados:
+  1. web
+  2. api
+  3. postgres
+
+Estrutura sugerida do repositório:
+
+vida-unica-rp/
+  apps/
+    web/
+      frontend do jogo
+    api/
+      backend do jogo
+  packages/
+    shared/
+      tipos e regras compartilhadas
+  prisma/
+    schema.prisma
+    migrations/
+  docs/
+    vida-unica-rp-spec.txt
+    game-design.md
+    economia.md
+    policia.md
+    hospital.md
+    prefeitura.md
+    empresas.md
+    regras-hardcore.md
+  README.md
+
+====================================================================
+4. ESTILO VISUAL DO JOGO
+====================================================================
+
+O site deve parecer um app mobile de jogo.
+
+Características visuais:
+
+- Tela cheia.
+- Tema escuro urbano.
+- Cards arredondados.
+- Botões grandes.
+- Ícones claros.
+- Menu inferior fixo.
+- Indicador de risco por cor.
+- Notificações em tempo real.
+- Animações leves.
+- Feedback visual após cada ação.
+- Nada de visual de fórum antigo.
+- Nada de interface carregada demais.
+
+Menu inferior sugerido:
+
+[Cidade] [Cena] [Ações] [Personagem] [Menu]
+
+Ou:
+
+🏙️ Cidade | 💬 Cena | ⚡ Ações | 🎒 Inventário | ☰ Menu
+
+Indicadores de risco:
+
+🟢 Risco baixo
+🟡 Risco médio
+🔴 Risco alto
+☠️ Risco extremo
+
+Exemplo de tela principal:
+
+VIDA ÚNICA RP
+
+Personagem: Rafael Monteiro
+Status: Vivo
+Local atual: Praça Central
+Risco atual: Baixo
+Dinheiro: R$ 850
+Profissão: Desempregado
+
+[Entrar na Cidade]
+[Procurar Emprego]
+[Ver Personagem]
+[Ver Inventário]
+[Ver Ocorrências]
+
+====================================================================
+5. SISTEMA DE LOGIN, SENHA E CONTA
+====================================================================
+
+O jogo deve ter sistema completo de conta com login e senha.
+
+O usuário deve conseguir:
+
+- Criar conta.
+- Fazer login.
+- Sair da conta.
+- Recuperar senha.
+- Alterar senha.
+- Alterar e-mail, se permitido.
+- Ver seus personagens vivos e mortos.
+- Criar novo personagem se não tiver personagem ativo.
+- Acessar histórico da conta.
+
+Campos básicos da conta:
+
+users
+- id
+- username
+- email
+- passwordHash
+- role
+- isBanned
+- banReason
+- createdAt
+- updatedAt
+- lastLoginAt
+
+A senha nunca deve ser salva em texto puro.
+A senha deve ser salva apenas como hash seguro.
+
+Sistema de autenticação recomendado:
+
+- Login com e-mail ou nome de usuário.
+- Senha com hash.
+- Sessão segura.
+- Token ou cookie seguro.
+- Proteção contra acesso não autorizado.
+- Middleware para proteger rotas privadas.
+
+Fluxo de cadastro:
+
+1. Usuário informa nome de usuário.
+2. Usuário informa e-mail.
+3. Usuário cria senha.
+4. Sistema cria conta.
+5. Usuário entra no painel.
+6. Usuário cria seu primeiro personagem.
+
+Fluxo de login:
+
+1. Usuário informa e-mail ou nome de usuário.
+2. Usuário informa senha.
+3. Sistema valida os dados.
+4. Sistema cria sessão.
+5. Usuário entra no jogo.
+
+Regras importantes:
+
+- Uma conta pode ter vários personagens mortos no histórico.
+- Uma conta deve ter apenas um personagem ativo principal por vez, salvo se futuramente for liberado múltiplos slots.
+- Personagem morto não pode ser acessado para jogar.
+- Novo personagem não herda nada do personagem morto.
+- Banimento de conta impede o usuário de jogar.
+- Banimento de personagem pode impedir apenas aquele personagem, se necessário.
+
+Telas necessárias:
+
+Tela de login:
+- Campo de e-mail ou usuário.
+- Campo de senha.
+- Botão Entrar.
+- Botão Criar conta.
+- Botão Esqueci minha senha.
+
+Tela de cadastro:
+- Nome de usuário.
+- E-mail.
+- Senha.
+- Confirmar senha.
+- Aceitar regras do RP Hardcore.
+- Criar conta.
+
+Tela de seleção/criação de personagem:
+- Ver personagem vivo.
+- Ver histórico de personagens mortos.
+- Criar novo personagem.
+- Ler regras de Vida Única.
+
+====================================================================
+6. CONTA E PERSONAGEM
+====================================================================
+
+O usuário cria uma conta.
+
+A conta pode ter histórico de personagens, mas apenas personagens vivos podem ser jogados.
+
+Cada personagem deve ter:
+
+- Nome
+- Idade
+- História
+- Aparência textual
+- Profissão
+- Status de vida
+- Local atual
+- Dinheiro em mãos
+- Conta bancária
+- Inventário
+- Habilidades
+- Estado emocional
+- Estado físico
+- Ficha criminal
+- Registros médicos
+- Cargo público ou privado
+- Empresa vinculada, se houver
+- Facção, se houver
+- Histórico de ações importantes
+
+Regra principal:
+
+Conta não morre.
+Personagem morre.
+
+Se o personagem morrer definitivamente:
+- O personagem vira histórico.
+- O jogador perde acesso a ele.
+- O jogador cria outro personagem do zero.
+- O novo personagem não herda memória, dinheiro, bens, contatos, facção ou cargo.
+
+====================================================================
+7. MORTE PERMANENTE / VIDA ÚNICA
+====================================================================
+
+O jogo é hardcore.
+
+Cada personagem tem uma vida.
+
+Se morrer definitivamente, perde:
+
+- Dinheiro
+- Banco
+- Casa
+- Veículos
+- Empresas
+- Itens
+- Armas
+- Cargo público
+- Facção
+- Reputação
+- Habilidades
+- Licenças
+- Histórico político
+- Contatos
+- Qualquer vantagem do personagem anterior
+
+Não deve haver herança fácil para o novo personagem.
+
+Possíveis estados de vida:
+
+1. Saudável
+2. Ferido leve
+3. Ferido moderado
+4. Ferido grave
+5. Crítico
+6. Inconsciente
+7. Em coma
+8. Morto definitivamente
+
+A morte definitiva deve acontecer em situações extremas, por exemplo:
+
+- Confronto armado grave.
+- Execução com contexto válido.
+- Falta de socorro em estado crítico.
+- Ferimento incompatível com sobrevivência.
+- Ação de altíssimo risco confirmada pelo jogador.
+- Consequência de evento grave.
+
+Antes de ações letais, o sistema deve avisar:
+
+⚠️ AÇÃO DE RISCO EXTREMO
+
+Essa ação pode causar morte permanente.
+Se o personagem morrer, você perderá tudo.
+
+[Confirmar]
+[Cancelar]
+
+Ações que devem gerar aviso de risco extremo:
+
+- Atirar contra policial.
+- Executar personagem.
+- Reagir a assalto armado.
+- Invadir local fortemente protegido.
+- Fugir gravemente ferido.
+- Fazer refém.
+- Participar de assalto a banco.
+- Entrar em confronto armado.
+- Tentar fuga sob cerco policial.
+
+====================================================================
+8. SISTEMA DE FERIMENTOS E HOSPITAL
+====================================================================
+
+O hospital é uma instituição essencial.
+
+O sistema deve permitir:
+
+- Ferimentos leves.
+- Ferimentos graves.
+- Sangramento.
+- Inconsciência.
+- Tempo crítico para socorro.
+- Internação.
+- Cirurgia.
+- Laudo médico.
+- Declaração de óbito.
+- Recuperação com tempo.
+
+Se houver médico jogador online:
+- O atendimento deve ir para o médico.
+- O médico escolhe ações por botões.
+
+Botões do médico:
+
+[Examinar]
+[Estancar sangramento]
+[Aplicar medicação]
+[Solicitar exame]
+[Levar para cirurgia]
+[Internar]
+[Emitir laudo]
+[Dar alta]
+[Declarar óbito]
+
+Se não houver médico jogador:
+- O NPC hospital oferece atendimento básico.
+- O NPC deve ter limitações.
+- O NPC não deve salvar tudo.
+- Casos graves podem ter chance real de morte.
+
+Exemplo:
+
+Nenhum médico online.
+Atendimento automático disponível:
+
+[Curativo simples - R$ 150]
+[Tratamento emergencial - R$ 500]
+[Internação automática - R$ 1.000]
+
+Limitações:
+- NPC não emite laudo detalhado.
+- NPC não resolve ferimentos extremos.
+- NPC cobra mais caro.
+- NPC tem chance menor de salvar casos críticos.
+
+====================================================================
+9. CIDADE POR LOCAIS
+====================================================================
+
+A cidade deve ser dividida em locais.
+
+Exemplos de locais:
+
+- Praça Central
+- Banco Central
+- Delegacia
+- Hospital
+- Prefeitura
+- Fórum
+- Mecânica
+- Mercado
+- Lanchonete
+- Bairros
+- Beco Industrial
+- Porto
+- Rodoviária
+- Estacionamento
+- Loja
+- Empresa
+- Prisão
+
+Cada local deve ter:
+
+- Nome
+- Descrição
+- Risco atual
+- Jogadores presentes
+- NPCs presentes, se houver
+- Ações disponíveis
+- Cenas em andamento
+- Conexões com outros locais
+- Histórico recente da cena
+
+Exemplo:
+
+🏦 Banco Central
+
+Ambiente:
+O banco está movimentado. Dois clientes aguardam atendimento. Um segurança observa a entrada.
+
+Pessoas presentes:
+- Ana Costa — Caixa
+- Marcos Vieira — Gerente
+- Paulo Mendes — Segurança
+- Rafael Monteiro — Cliente
+
+Ações disponíveis:
+[Falar com atendente]
+[Entrar na fila]
+[Sacar dinheiro]
+[Depositar]
+[Solicitar gerente]
+[Observar ambiente]
+[Sair]
+
+Se o jogador estiver armado ou tiver perfil criminoso, podem aparecer ações perigosas:
+
+[Sacar arma]
+[Render funcionário]
+[Iniciar assalto]
+
+====================================================================
+10. CHAT/CENA POR LOCAL
+====================================================================
+
+O jogo deve ter chat por local, mas não no estilo de comandos.
+
+O chat deve ser uma linha do tempo narrativa da cena.
+
+O jogador não digita /me, /diz ou /grita.
+Ele clica em botões.
+
+Tipos de interação:
+
+- Conversar
+- Sussurrar
+- Gritar
+- Observar
+- Ameaçar
+- Negociar
+- Intimidar
+- Pedir ajuda
+- Mentir
+- Confessar
+- Chamar alguém
+
+Quando clicar em Conversar, Sussurrar, Gritar ou Negociar, abre uma caixa para digitar a fala.
+
+Exemplo:
+
+Jogador clica:
+[Conversar]
+
+Abre:
+Digite a fala do personagem:
+
+"Boa tarde. Quero falar com o gerente."
+
+O chat mostra:
+
+Rafael Monteiro diz:
+Boa tarde. Quero falar com o gerente.
+
+Para ações físicas, não deve precisar escrever. O sistema narra.
+
+Exemplo:
+
+Jogador clica:
+[Sacar arma]
+
+O chat mostra:
+
+Sistema:
+Rafael Monteiro sacou uma arma dentro do Banco Central.
+
+O chat deve registrar:
+- Quem entrou no local.
+- Quem saiu.
+- Quem falou.
+- Quem clicou em ação.
+- Resultado da ação.
+- Mudanças de estado.
+- Alertas.
+- Ferimentos.
+- Prisões.
+- Mortes.
+- Chamados policiais.
+- Atendimento médico.
+- Abertura de protocolos.
+- Transferências importantes.
+
+====================================================================
+11. AÇÕES POR BOTÕES
+====================================================================
+
+O jogo deve ser baseado em botões contextuais.
+
+Botões mudam conforme:
+
+- Local
+- Profissão
+- Estado do personagem
+- Itens no inventário
+- Risco do ambiente
+- Pessoas presentes
+- Ocorrências em andamento
+- Cargo do personagem
+- Ficha criminal
+- Situação emocional
+- Situação física
+
+Exemplos de ações comuns:
+
+[Conversar]
+[Sussurrar]
+[Gritar]
+[Observar]
+[Sentar]
+[Levantar]
+[Entrar]
+[Sair]
+[Correr]
+[Esconder-se]
+[Render-se]
+[Pedir ajuda]
+[Chamar emergência]
+
+Ações criminais:
+
+[Sacar arma]
+[Guardar arma]
+[Intimidar]
+[Assaltar]
+[Render vítima]
+[Revistar]
+[Roubar carteira]
+[Fazer refém]
+[Arrombar porta]
+[Abrir cofre]
+[Fugir]
+[Atirar]
+[Executar]
+
+Ações policiais:
+
+[Abordar]
+[Pedir documento]
+[Revistar]
+[Algemar]
+[Dar voz de prisão]
+[Conduzir]
+[Solicitar reforço]
+[Negociar rendição]
+[Abrir ocorrência]
+[Preservar cena]
+[Acionar Polícia Civil]
+
+Ações médicas:
+
+[Examinar]
+[Estancar sangramento]
+[Aplicar medicação]
+[Internar]
+[Operar]
+[Emitir laudo]
+[Dar alta]
+[Declarar óbito]
+
+Ações de prefeitura:
+
+[Emitir documento]
+[Abrir protocolo]
+[Aprovar empresa]
+[Negar solicitação]
+[Cobrar taxa]
+[Emitir alvará]
+[Fiscalizar empresa]
+[Aplicar multa]
+
+Ações bancárias:
+
+[Sacar]
+[Depositar]
+[Consultar saldo]
+[Atender cliente]
+[Aprovar conta empresarial]
+[Analisar empréstimo]
+[Bloquear conta]
+[Reportar fraude]
+[Acionar alarme silencioso]
+
+====================================================================
+12. SISTEMA DE JOGADOR PRIMEIRO, NPC DEPOIS
+====================================================================
+
+Regra central:
+
+Jogador sempre tem prioridade.
+NPC nunca substitui completamente o jogador.
+NPC apenas evita que o jogo trave.
+
+Fluxo geral:
+
+Jogador precisa de serviço
+↓
+Existe profissional jogador online?
+↓
+Sim → atendimento humano
+↓
+Não → NPC oferece solução limitada
+↓
+Casos importantes ficam pendentes para jogadores analisarem depois
+
+Exemplo no banco:
+
+Precisa abrir conta empresarial?
+↓
+Tem gerente jogador online?
+↓
+Sim → gerente analisa
+↓
+Não → sistema abre protocolo pendente
+
+Exemplo no hospital:
+
+Jogador ferido chega ao hospital
+↓
+Tem médico jogador online?
+↓
+Sim → médico atende
+↓
+Não → NPC oferece atendimento emergencial limitado
+
+Exemplo na polícia:
+
+Crime acontece
+↓
+Tem policial online?
+↓
+Sim → PM recebe ocorrência
+↓
+Não → sistema registra provas, câmeras e testemunhas NPC
+↓
+Caso fica pendente para Polícia Civil
+
+NPC deve ter limitações:
+
+- Cobra mais caro.
+- Demora mais.
+- Não resolve casos complexos.
+- Não aprova decisões grandes.
+- Não remove consequências graves.
+- Não substitui julgamento humano.
+- Não dá vantagens especiais.
+- Sempre deixa registro.
+
+====================================================================
+13. PROFISSÕES E CARGOS
+====================================================================
+
+O jogo deve valorizar até profissões pequenas.
+
+Não devem existir apenas policiais, médicos e criminosos. O mundo precisa de cargos comuns que geram RP.
+
+Cargos públicos:
+
+- Policial Militar
+- Policial Civil
+- Médico
+- Enfermeiro
+- Recepcionista hospitalar
+- Funcionário da prefeitura
+- Fiscal
+- Secretário
+- Prefeito
+- Juiz
+- Promotor
+- Defensor público
+- Agente penitenciário
+
+Cargos privados:
+
+- Caixa de banco
+- Gerente de banco
+- Segurança de banco
+- Caixa de mercado
+- Repositor
+- Atendente de lanchonete
+- Cozinheiro
+- Entregador
+- Mecânico
+- Guincheiro
+- Taxista
+- Motorista
+- Jornalista
+- Advogado
+- Corretor
+- Empresário
+
+Cargos criminais:
+
+- Assaltante
+- Traficante
+- Contrabandista
+- Lavador de dinheiro
+- Falsificador
+- Informante
+- Chefe de facção
+- Segurança de facção
+
+Cada cargo deve ter botões úteis.
+
+Exemplo: caixa de banco
+
+[Atender cliente]
+[Consultar conta]
+[Registrar saque]
+[Registrar depósito]
+[Chamar gerente]
+[Acionar alarme silencioso]
+
+Exemplo: segurança do banco
+
+[Observar entrada]
+[Abordar suspeito]
+[Acionar polícia]
+[Proteger funcionário]
+[Sacar arma]
+[Evacuar clientes]
+
+Exemplo: recepcionista do hospital
+
+[Registrar paciente]
+[Chamar médico]
+[Priorizar emergência]
+[Abrir ficha]
+[Encaminhar para sala]
+
+Exemplo: caixa de mercado
+
+[Registrar venda]
+[Repor estoque]
+[Fechar caixa]
+[Chamar segurança]
+[Acionar alarme]
+
+====================================================================
+14. EMPRESAS
+====================================================================
+
+Empresas devem ser controladas por jogadores sempre que possível.
+
+Tipos de empresas:
+
+- Banco
+- Mercado
+- Lanchonete
+- Mecânica
+- Clínica privada
+- Jornal
+- Imobiliária
+- Escritório de advocacia
+- Segurança privada
+- Transporte
+- Fábrica
+- Distribuidora
+- Oficina
+- Restaurante
+
+Cada empresa deve ter:
+
+- Dono
+- Funcionários
+- Caixa da empresa
+- Estoque
+- Produtos
+- Serviços
+- Salários
+- Impostos
+- Licença/alvará
+- Histórico financeiro
+- Contratos
+- Risco de fiscalização
+
+Empresas precisam movimentar a economia.
+
+Exemplo de empresa: Mecânica
+
+Funcionários:
+- Dono
+- Mecânico
+- Atendente
+- Guincheiro
+
+Ações:
+[Atender cliente]
+[Gerar orçamento]
+[Reparar veículo]
+[Chamar guincho]
+[Comprar peças]
+[Contratar funcionário]
+[Pagar salário]
+[Pagar imposto]
+
+Se não houver mecânico online:
+- NPC pode fazer reparo básico.
+- NPC cobra mais caro.
+- NPC não faz melhoria especial.
+- NPC não dá desconto.
+- NPC não gera RP.
+
+====================================================================
+15. PREFEITURA
+====================================================================
+
+A prefeitura deve controlar serviços públicos, empresas, documentos, impostos e política.
+
+Funções da prefeitura:
+
+- Emitir documentos
+- Abrir protocolos
+- Aprovar empresas
+- Emitir alvarás
+- Cobrar taxas
+- Fiscalizar empresas
+- Aplicar multas
+- Organizar eleições
+- Criar leis municipais
+- Liberar contratos públicos
+- Gerenciar licitações
+- Administrar terrenos públicos
+
+Cargos:
+
+- Prefeito
+- Vice-prefeito
+- Secretário
+- Fiscal
+- Atendente
+- Tesoureiro
+
+Se houver funcionário jogador online:
+- O atendimento deve ser humano.
+
+Se não houver:
+- Sistema emite documentos simples.
+- Sistema abre protocolo.
+- Decisões grandes ficam pendentes.
+
+Coisas que NPC pode fazer:
+- Emitir RG básico.
+- Renovar documento simples.
+- Receber imposto.
+- Abrir protocolo.
+
+Coisas que exigem jogador:
+- Aprovar empresa grande.
+- Liberar alvará especial.
+- Fechar empresa.
+- Aprovar contrato público.
+- Liberar terreno.
+- Criar lei.
+- Aplicar fiscalização avançada.
+
+====================================================================
+16. BANCO
+====================================================================
+
+O banco deve ser uma instituição importante, com jogadores trabalhando.
+
+Funções do banco:
+
+- Conta pessoal
+- Conta empresarial
+- Saque
+- Depósito
+- Transferência
+- Empréstimo
+- Bloqueio judicial
+- Fraude
+- Cofre
+- Dinheiro marcado
+- Segurança
+- Assalto a banco
+
+Cargos:
+
+- Caixa
+- Gerente
+- Segurança
+- Analista de crédito
+- Diretor
+
+Ações de cliente:
+
+[Sacar dinheiro]
+[Depositar]
+[Transferir]
+[Consultar saldo]
+[Solicitar empréstimo]
+[Abrir conta empresarial]
+[Falar com gerente]
+
+Ações do caixa:
+
+[Atender cliente]
+[Registrar saque]
+[Registrar depósito]
+[Encaminhar ao gerente]
+[Acionar alarme silencioso]
+
+Ações do gerente:
+
+[Aprovar conta empresarial]
+[Negar conta]
+[Analisar empréstimo]
+[Bloquear conta]
+[Reportar fraude]
+[Autorizar cofre]
+
+Ações do segurança:
+
+[Observar entrada]
+[Abordar suspeito]
+[Chamar polícia]
+[Proteger funcionário]
+[Evacuar clientes]
+
+Se não houver jogador:
+- NPC permite saque, depósito e consulta.
+- Empréstimo, conta empresarial e bloqueio ficam pendentes.
+- Assalto ainda gera provas e consequências.
+
+====================================================================
+17. POLÍCIA MILITAR
+====================================================================
+
+A Polícia Militar deve cuidar de ocorrências em andamento, abordagem, patrulha, prisão em flagrante e resposta a crimes.
+
+Funções:
+
+- Atender ocorrências
+- Patrulhar locais
+- Abordar suspeitos
+- Prender em flagrante
+- Proteger civis
+- Negociar rendição
+- Cercar áreas
+- Acionar hospital
+- Preservar cena
+- Encaminhar caso à Polícia Civil
+
+Botões da PM:
+
+[Assumir ocorrência]
+[Ir ao local]
+[Chamar reforço]
+[Montar cerco]
+[Negociar]
+[Abordar]
+[Pedir documento]
+[Revistar]
+[Algemar]
+[Dar voz de prisão]
+[Conduzir à delegacia]
+[Solicitar ambulância]
+[Preservar cena]
+
+A PM também pode morrer permanentemente.
+Policial não é imortal.
+
+Se um policial agir errado:
+- Pode ser investigado.
+- Pode perder cargo.
+- Pode responder processo.
+- Pode ser preso.
+- Pode sofrer punição administrativa.
+
+====================================================================
+18. POLÍCIA CIVIL
+====================================================================
+
+A Polícia Civil deve cuidar de investigação.
+
+Funções:
+
+- Investigar crimes
+- Analisar provas
+- Abrir inquérito
+- Convocar testemunhas
+- Interrogar suspeitos
+- Solicitar mandado
+- Cruzar informações
+- Investigar homicídios
+- Investigar assaltos
+- Investigar lavagem de dinheiro
+
+Toda morte deve gerar caso automático.
+
+Exemplo:
+
+☠️ Novo caso de homicídio
+
+Vítima: Rafael Monteiro
+Local: Beco Industrial
+Hora: 22:43
+Suspeitos próximos: 3
+
+Provas:
+- Cápsulas encontradas
+- Sangue
+- Câmera parcial
+- Últimas mensagens
+- Testemunhas NPC
+- Veículo visto na região
+
+Botões da Polícia Civil:
+
+[Abrir inquérito]
+[Analisar câmeras]
+[Convocar testemunha]
+[Interrogar suspeito]
+[Solicitar mandado]
+[Rastrear dinheiro]
+[Cruzar suspeitos]
+[Arquivar caso]
+[Encaminhar ao fórum]
+
+====================================================================
+19. SISTEMA JURÍDICO
+====================================================================
+
+O jogo deve ter sistema jurídico para dar consequência aos crimes.
+
+Instituições:
+
+- Fórum
+- Juiz
+- Promotor
+- Advogado
+- Defensor público
+- Polícia Civil
+- Sistema prisional
+
+Funcionalidades:
+
+- Processos
+- Audiências
+- Mandados
+- Prisões
+- Multas
+- Fianças
+- Condenações
+- Recursos
+- Confisco de bens
+- Bloqueio de contas
+- Julgamento de crimes graves
+
+Prisão não deve ser apenas "ficar parado".
+Prisão deve ter gameplay:
+
+- Trabalho prisional
+- Visitas
+- Facções internas
+- Advogado
+- Audiência
+- Tentativa de redução de pena
+- Tentativa de fuga com risco extremo
+
+====================================================================
+20. CRIME
+====================================================================
+
+O crime deve ter lucro alto, mas risco alto.
+
+Atividades criminais:
+
+- Assalto a pessoa
+- Assalto a mercado
+- Assalto a banco
+- Roubo de veículo
+- Sequestro
+- Tráfico
+- Contrabando
+- Falsificação
+- Lavagem de dinheiro
+- Extorsão
+- Homicídio
+- Corrupção
+
+Todo crime deve deixar rastros.
+
+Rastros possíveis:
+
+- Câmeras
+- Testemunhas
+- Placa de veículo
+- Impressões digitais
+- Dinheiro marcado
+- Mensagens
+- Localização
+- Cápsulas
+- Sangue
+- Objetos esquecidos
+- Reconhecimento parcial
+- Histórico de movimentação
+
+Criminoso deve pensar antes de agir.
+
+Se for burro, morre rápido ou é preso.
+Se for estratégico, pode crescer.
+
+====================================================================
+21. SISTEMA DE MEDO, PRESSÃO E ESTADO EMOCIONAL
+====================================================================
+
+O jogo deve ter estados emocionais.
+
+Estados possíveis:
+
+- Calmo
+- Tenso
+- Assustado
+- Em pânico
+- Dominado
+- Confiante
+- Nervoso
+- Desesperado
+- Ferido
+- Exausto
+
+Esses estados influenciam ações.
+
+Exemplo:
+
+Se o personagem está cercado por 3 policiais armados:
+- Estado mental pode virar Pânico.
+- Ações de precisão podem receber penalidade.
+- Atirar pode ter chance menor.
+- Render-se pode ficar mais provável.
+- Fugir pode ser possível, mas com alto risco.
+
+Exemplo:
+
+Você está cercado por 3 policiais armados.
+Estado mental: Pânico.
+
+Ações disponíveis:
+[Se render]
+[Soltar arma]
+[Negociar]
+[Gritar]
+[Tentar fugir]
+
+Ações bloqueadas ou dificultadas:
+[Atirar com precisão]
+[Reagir corpo a corpo]
+
+====================================================================
+22. SISTEMA DE HABILIDADES E EXPERIÊNCIA
+====================================================================
+
+O jogo deve ter sistema de habilidades.
+
+As habilidades devem evoluir com prática real dentro do RP.
+
+O personagem não deve começar como especialista em tudo.
+
+Cada função deve ter habilidades próprias.
+
+A ideia central:
+
+"Para perder medo, melhorar tiro, melhorar medicina, negociar melhor ou agir melhor, o personagem precisa viver situações reais, treinar e ganhar experiência."
+
+Habilidades gerais:
+
+- Coragem
+- Controle emocional
+- Resistência ao medo
+- Percepção
+- Carisma
+- Negociação
+- Intimidação
+- Furtividade
+- Direção
+- Reflexo
+- Condicionamento físico
+- Reputação pública
+
+Habilidades policiais:
+
+- Presença policial
+- Abordagem
+- Controle emocional em ocorrência
+- Negociação de crise
+- Tática policial
+- Investigação básica
+- Uso progressivo da força
+- Mira policial
+- Controle de cena
+- Resistência à pressão
+
+Habilidades criminais:
+
+- Intimidação criminal
+- Frieza
+- Fuga
+- Arrombamento
+- Roubo
+- Controle de reféns
+- Uso de arma
+- Disfarce
+- Lavagem de dinheiro
+- Contrabando
+- Liderança criminal
+
+Habilidades médicas:
+
+- Primeiros socorros
+- Diagnóstico
+- Cirurgia
+- Controle de sangramento
+- Atendimento emergencial
+- Laudo médico
+- Recuperação de paciente
+- Gestão hospitalar
+
+Habilidades civis/profissionais:
+
+- Atendimento ao cliente
+- Administração
+- Mecânica
+- Vendas
+- Culinária
+- Entrega
+- Jornalismo
+- Advocacia
+- Gestão empresarial
+- Finanças
+- Reparos
+- Condução profissional
+
+Habilidades de tiro:
+
+- Mira
+- Controle de recuo
+- Saque rápido
+- Precisão sob pressão
+- Manuseio seguro
+- Tiro defensivo
+- Tiro tático
+- Controle emocional armado
+
+Importante:
+
+Tiro não deve evoluir apenas disparando sem contexto.
+Deve exigir treino, ocorrência real ou atividade válida.
+
+====================================================================
+23. COMO GANHAR EXPERIÊNCIA EM HABILIDADES
+====================================================================
+
+O sistema deve dar XP de habilidade por ações válidas.
+
+Exemplo:
+
+Policial quer perder medo e melhorar controle emocional.
+
+Ele ganha experiência ao:
+
+- Participar de patrulha.
+- Fazer abordagem sem abuso.
+- Atender ocorrência real.
+- Negociar rendição.
+- Prender suspeito sem confronto.
+- Controlar cena com reféns.
+- Sobreviver a ocorrência perigosa.
+- Treinar na academia policial.
+- Participar de operação autorizada.
+- Preservar cena de crime.
+
+Quanto mais grave e legítima a ocorrência, mais XP.
+
+Mas deve existir proteção anti-farm.
+
+Não pode ganhar XP infinito clicando na mesma ação.
+
+Regras anti-farm:
+
+- Cooldown por ação repetida.
+- XP reduzido se repetir muito.
+- XP só conta se houver contexto real.
+- XP maior em eventos com outros jogadores.
+- XP menor contra NPC.
+- XP bloqueado se ação for simulada de forma abusiva.
+- Staff pode revisar abuso.
+
+Exemplo para policial:
+
+Ação:
+[Abordar suspeito]
+
+XP possível:
+- Abordagem: +5
+- Controle emocional: +2
+- Presença policial: +3
+
+Mas se o jogador abordar o próprio amigo 50 vezes para farmar:
+- Sistema detecta repetição.
+- XP reduzido a zero.
+- Pode gerar alerta para staff.
+
+====================================================================
+24. EXEMPLOS DE PROGRESSÃO POR FUNÇÃO
+====================================================================
+
+POLICIAL
+
+Habilidades principais:
+- Controle emocional
+- Presença policial
+- Abordagem
+- Negociação
+- Tática
+- Mira policial
+
+Como evolui:
+
+Controle emocional:
+- Atender ocorrência perigosa.
+- Ficar sob ameaça.
+- Negociar com criminoso.
+- Ver arma apontada e não entrar em pânico.
+- Participar de cerco.
+
+Presença policial:
+- Fazer patrulha.
+- Abordar suspeitos.
+- Resolver conflito sem tiro.
+- Proteger civis.
+- Dar voz de prisão com sucesso.
+
+Mira policial:
+- Treino autorizado.
+- Confronto real.
+- Operação.
+- Uso correto da arma.
+
+Efeito no jogo:
+
+Policial experiente:
+- Sente menos medo.
+- Tem mais chance de manter calma.
+- Intimida criminosos fracos.
+- Negocia melhor.
+- Tem melhor chance de abordagem segura.
+- Tem menor penalidade em situação de risco.
+
+BANDIDO
+
+Habilidades principais:
+- Intimidação
+- Frieza
+- Fuga
+- Roubo
+- Arrombamento
+- Controle de reféns
+- Tiro criminal
+
+Como evolui:
+
+Intimidação:
+- Assaltar com sucesso.
+- Render vítima.
+- Controlar refém.
+- Ameaçar sem perder controle.
+- Manter domínio da cena.
+
+Frieza:
+- Participar de crimes graves.
+- Ficar sob pressão policial.
+- Fugir de cerco.
+- Não entrar em pânico durante assalto.
+
+Fuga:
+- Escapar de perseguição.
+- Usar rota de fuga.
+- Dirigir sob pressão.
+- Evitar identificação.
+
+Efeito no jogo:
+
+Bandido experiente:
+- Tem mais chance de intimidar civis.
+- Sente menos pânico.
+- Controla melhor reféns.
+- Tem mais chance de fuga.
+- Mantém calma em assaltos.
+
+CIVIL
+
+Habilidades principais:
+- Coragem
+- Percepção
+- Negociação
+- Carisma
+- Resistência emocional
+- Profissão
+
+Como evolui:
+
+Coragem:
+- Sobreviver a situações perigosas.
+- Denunciar crime.
+- Ajudar vítimas.
+- Participar de eventos tensos.
+- Resistir à intimidação, quando coerente.
+
+Percepção:
+- Observar locais.
+- Identificar suspeitos.
+- Perceber comportamento estranho.
+- Testemunhar crimes.
+
+Carisma:
+- Atender pessoas.
+- Negociar.
+- Participar da política.
+- Trabalhar com público.
+
+Efeito no jogo:
+
+Civil experiente:
+- Entra menos em pânico.
+- Pode identificar risco.
+- Pode negociar melhor.
+- Pode resistir a intimidação fraca.
+
+MÉDICO
+
+Habilidades principais:
+- Primeiros socorros
+- Diagnóstico
+- Cirurgia
+- Controle de sangramento
+- Atendimento emergencial
+- Laudo médico
+
+Como evolui:
+
+Primeiros socorros:
+- Atender feridos leves.
+- Estabilizar paciente.
+- Usar kit médico.
+
+Diagnóstico:
+- Examinar pacientes.
+- Identificar ferimentos.
+- Solicitar exames.
+
+Cirurgia:
+- Participar de cirurgia.
+- Tratar ferimentos graves.
+- Salvar paciente crítico.
+
+Efeito no jogo:
+
+Médico experiente:
+- Salva mais pacientes.
+- Reduz chance de morte.
+- Emite laudos melhores.
+- Atua melhor sob pressão.
+- Reduz tempo de recuperação.
+
+MECÂNICO
+
+Habilidades principais:
+- Reparo
+- Diagnóstico mecânico
+- Guincho
+- Modificação
+- Gestão de oficina
+
+Como evolui:
+- Reparar veículos.
+- Guinchar.
+- Trocar peças.
+- Atender clientes.
+- Diagnosticar danos.
+
+Efeito:
+- Reparo mais rápido.
+- Menor custo de material.
+- Melhor qualidade de serviço.
+- Pode instalar melhorias avançadas.
+
+EMPRESÁRIO
+
+Habilidades principais:
+- Administração
+- Vendas
+- Finanças
+- Liderança
+- Negociação
+
+Como evolui:
+- Contratar funcionários.
+- Pagar salários.
+- Vender produtos.
+- Fechar contratos.
+- Manter empresa ativa.
+- Pagar impostos.
+
+Efeito:
+- Melhor reputação empresarial.
+- Menor risco de falência.
+- Mais confiança de clientes.
+- Mais capacidade de contratos.
+
+====================================================================
+25. NÍVEIS DE HABILIDADE
+====================================================================
+
+Cada habilidade pode ir de 0 a 100.
+
+Faixas:
+
+0 a 10:
+Inexperiente
+
+11 a 30:
+Básico
+
+31 a 50:
+Treinado
+
+51 a 70:
+Experiente
+
+71 a 90:
+Especialista
+
+91 a 100:
+Elite
+
+Exemplo:
+
+Controle emocional policial: 8
+Resultado:
+Policial novato pode entrar em pânico em ocorrência grave.
+
+Controle emocional policial: 65
+Resultado:
+Policial experiente mantém a calma em cerco armado.
+
+Controle emocional policial: 95
+Resultado:
+Policial elite consegue negociar sob pressão extrema.
+
+====================================================================
+26. COMO HABILIDADES AFETAM AÇÕES
+====================================================================
+
+As habilidades devem influenciar cálculos.
+
+Exemplo de intimidação:
+
+Chance de intimidar =
+Intimidação do agressor
++ arma em mãos
++ reputação
++ vantagem numérica
++ frieza
+- coragem da vítima
+- controle emocional da vítima
+- presença policial próxima
+- local movimentado
+
+Exemplo de abordagem policial:
+
+Chance de abordagem bem-sucedida =
+Presença policial
++ abordagem
++ controle emocional
++ apoio de outro policial
+- frieza do criminoso
+- chance de fuga do criminoso
+- pânico da cena
+
+Exemplo de tiro:
+
+Chance de acerto =
+Mira
++ treinamento
++ arma adequada
++ distância favorável
+- medo
+- ferimento
+- movimento do alvo
+- cobertura do alvo
+- estresse da cena
+
+Exemplo de atendimento médico:
+
+Chance de salvar =
+Primeiros socorros
++ diagnóstico
++ cirurgia, se necessário
++ tempo de chegada
++ equipamentos
+- gravidade do ferimento
+- sangramento
+- atraso no atendimento
+
+====================================================================
+27. REPUTAÇÃO
+====================================================================
+
+O jogo deve ter reputação.
+
+Tipos de reputação:
+
+- Reputação pública
+- Reputação profissional
+- Reputação policial
+- Reputação médica
+- Reputação empresarial
+- Reputação criminal
+- Reputação política
+
+Reputação não é a mesma coisa que habilidade.
+
+Habilidade = capacidade real do personagem.
+Reputação = como o mundo vê o personagem.
+
+Exemplo:
+
+Um médico pode ter alta habilidade, mas baixa reputação se ninguém conhece ele.
+
+Um criminoso pode ter baixa habilidade, mas alta reputação por boatos.
+
+VIP pode dar 2x reputação em ações permitidas.
+
+Ações que geram reputação:
+
+- Trabalhar bem.
+- Resolver ocorrências.
+- Salvar pacientes.
+- Vender serviços.
+- Cumprir contratos.
+- Participar da política.
+- Vencer disputa criminal.
+- Fugir de grande operação.
+- Ser preso por crime famoso.
+- Aparecer no jornal.
+
+Reputação deve ter consequências.
+
+Exemplo:
+
+Alta reputação policial:
+- Criminosos fracos sentem mais medo.
+- Civis confiam mais.
+- Abordagens têm mais peso.
+
+Alta reputação criminal:
+- Civis sentem mais medo.
+- Facções respeitam mais.
+- Polícia investiga mais.
+- Risco de denúncia aumenta.
+
+Alta reputação médica:
+- Pacientes procuram mais.
+- Hospital confia mais.
+- Laudos têm mais peso.
+
+Alta reputação empresarial:
+- Clientes procuram mais.
+- Prefeitura confia mais.
+- Bancos liberam mais crédito.
+
+====================================================================
+28. ASSALTO A BANCO
+====================================================================
+
+Assalto a banco deve ser um dos eventos mais perigosos do jogo.
+
+Não deve ser farm.
+Deve ser uma operação de alto risco.
+
+Requisitos para iniciar:
+
+- Estar armado.
+- Ter grupo mínimo.
+- Ter item de invasão/cofre.
+- Estar dentro do banco.
+- Aceitar risco extremo.
+- Não estar em cooldown criminal.
+
+Antes de iniciar:
+
+⚠️ AÇÃO EXTREMA
+
+Assalto a banco pode gerar:
+- Prisão longa
+- Perda de itens
+- Investigação criminal
+- Morte permanente
+- Bloqueio de bens
+- Caçada policial
+
+[Confirmar assalto]
+[Cancelar]
+
+Fases do assalto:
+
+1. Entrada no banco
+2. Render funcionários
+3. Controle de reféns
+4. Alarme silencioso
+5. Resposta policial
+6. Abertura do cofre
+7. Negociação
+8. Fuga, rendição ou confronto
+9. Investigação pós-assalto
+10. Lavagem do dinheiro
+
+Ações dos criminosos:
+
+[Sacar arma]
+[Render funcionário]
+[Controlar reféns]
+[Fechar portas]
+[Ameaçar gerente]
+[Procurar câmeras]
+[Ir até o cofre]
+[Abrir cofre]
+[Negociar]
+[Fugir]
+[Se render]
+[Atirar]
+[Fazer refém]
+
+Ações dos civis/reféns:
+
+[Levantar as mãos]
+[Se esconder]
+[Acionar alarme discretamente]
+[Gritar]
+[Tentar fugir]
+[Obedecer]
+
+Ações da polícia:
+
+[Assumir ocorrência]
+[Chamar reforço]
+[Montar cerco]
+[Enviar negociador]
+[Pedir prova de vida]
+[Exigir refém liberado]
+[Preparar invasão]
+[Autorizar atirador]
+[Negociar rendição]
+
+Possíveis finais:
+
+1. Rendição
+2. Fuga parcial
+3. Sucesso total
+4. Confronto armado
+5. Reféns mortos
+6. Criminosos mortos
+7. Prisão
+8. Investigação futura
+
+Dinheiro roubado deve ser dinheiro marcado.
+Não deve ser seguro usar imediatamente.
+Precisa ser lavado.
+
+Após o assalto, sistema gera relatório:
+
+Relatório criminal:
+- Data
+- Local
+- Envolvidos
+- Reféns
+- Valor levado
+- Feridos
+- Mortos
+- Policiais envolvidos
+- Provas coletadas
+- Suspeitos identificados
+- Estado da investigação
+
+====================================================================
+29. ECONOMIA
+====================================================================
+
+A economia deve ser difícil.
+
+Características:
+
+- Dinheiro difícil.
+- Itens caros.
+- Armas raras.
+- Veículos caros.
+- Casas caras.
+- Empresas difíceis de manter.
+- Impostos reais.
+- Multas pesadas.
+- Prisão pesa.
+- Morte apaga tudo.
+
+Fontes de renda:
+
+- Emprego público
+- Emprego privado
+- Empresa
+- Trabalho autônomo
+- Crime
+- Contratos
+- Serviços
+- Comércio
+
+Trabalhos automáticos existem, mas pagam menos.
+
+Exemplo:
+
+Trabalho automático:
+R$ 300 a R$ 600 por turno.
+
+Trabalho com jogador/empresa:
+R$ 800 a R$ 2.000 por turno.
+
+Objetivo:
+Incentivar interação entre jogadores.
+
+====================================================================
+30. SISTEMA VIP
+====================================================================
+
+O jogo terá sistema VIP mensal.
+
+Plano inicial:
+
+VIP Vida Única
+Valor: R$ 25,00 por mês.
+
+Benefícios definidos pelo projeto:
+
+- 2x salário.
+- 2x reputação.
+
+IMPORTANTE:
+Como o jogo é hardcore e sério, o VIP não deve dar vantagem direta em combate, morte, tiro, polícia, fuga ou assalto.
+
+VIP não deve dar:
+
+- Mais vida.
+- Mais dano.
+- Melhor mira.
+- Menos medo em confronto.
+- Imunidade.
+- Proteção contra morte.
+- Armas grátis.
+- Dinheiro criminal dobrado.
+- Chance maior de fugir da polícia.
+- Chance maior de sobreviver.
+
+VIP pode dar:
+
+- Multiplicador de salário legal.
+- Multiplicador de reputação social/legal.
+- Ícone cosmético discreto.
+- Título visual.
+- Prioridade visual em fila de atendimento, se não prejudicar RP.
+- Mais opções de aparência.
+- Slots cosméticos.
+- Histórico de personagem mais bonito.
+- Tema visual opcional.
+- Benefícios que não destruam o equilíbrio.
+
+Regra do 2x salário:
+
+O VIP deve aplicar 2x em salários legais e oficiais.
+
+Exemplos:
+- Salário de policial.
+- Salário de médico.
+- Salário de funcionário da prefeitura.
+- Salário de empresa.
+- Trabalho automático legal.
+- Trabalho civil.
+
+O VIP não deve aplicar 2x em:
+- Roubo.
+- Assalto.
+- Dinheiro de banco roubado.
+- Tráfico.
+- Lavagem de dinheiro.
+- Extorsão.
+- Sequestro.
+- Recompensa criminal.
+
+Regra do 2x reputação:
+
+O VIP deve aplicar 2x em reputação de ações legais, sociais ou profissionais.
+
+Exemplos:
+- Atender paciente.
+- Resolver ocorrência sem morte.
+- Trabalhar corretamente.
+- Atender cliente.
+- Cumprir contrato.
+- Participar de evento público.
+- Realizar ação de empresa.
+
+O VIP não deve dobrar reputação criminal extrema de forma desbalanceada.
+
+Se houver reputação criminal, ela deve ser tratada com cuidado.
+
+Campos no banco:
+
+subscriptions
+- id
+- userId
+- planName
+- price
+- status
+- startedAt
+- expiresAt
+- paymentProvider
+- paymentReference
+- createdAt
+- updatedAt
+
+Status:
+
+- active
+- expired
+- canceled
+- pending
+- manually_activated
+
+No MVP, o VIP pode começar como ativação manual pelo admin.
+
+Depois pode integrar com pagamento automático.
+
+Painel admin para VIP:
+
+[Ativar VIP]
+[Cancelar VIP]
+[Renovar VIP]
+[Ver vencimento]
+[Ver histórico de pagamento]
+
+Tela do jogador:
+
+VIP: Ativo
+Plano: Vida Única
+Vence em: data
+Benefícios:
+- 2x salário legal
+- 2x reputação legal/social
+
+====================================================================
+31. INVENTÁRIO E ITENS
+====================================================================
+
+Cada personagem deve ter inventário.
+
+Itens possíveis:
+
+- Documento
+- Celular
+- Dinheiro físico
+- Chaves
+- Ferramentas
+- Armas
+- Munição
+- Remédios
+- Contratos
+- Máscara
+- Mochila
+- Produtos
+- Itens roubados
+- Dinheiro marcado
+- Equipamentos policiais
+- Equipamentos médicos
+
+Itens devem influenciar ações.
+
+Exemplo:
+
+Para assaltar:
+- Precisa estar armado ou ter força/intimidação suficiente.
+
+Para abrir cofre:
+- Precisa de ferramenta, cartão, senha, gerente ou habilidade técnica.
+
+Para tratar ferimento:
+- Precisa de kit médico, hospital ou médico.
+
+====================================================================
+32. SISTEMA DE CASAS E PROPRIEDADES
+====================================================================
+
+O jogo deve ter casas, apartamentos, terrenos e propriedades.
+
+Tipos de propriedade:
+
+- Casa simples.
+- Apartamento.
+- Casa média.
+- Casa de luxo.
+- Mansão.
+- Kitnet.
+- Terreno.
+- Sítio.
+- Galpão.
+- Ponto comercial.
+- Garagem.
+- Esconderijo ilegal.
+
+Cada propriedade deve ter:
+
+properties
+- id
+- name
+- type
+- locationId
+- ownerCharacterId
+- price
+- rentPrice
+- taxAmount
+- status
+- storageLimit
+- garageSlots
+- securityLevel
+- isForSale
+- isForRent
+- createdAt
+- updatedAt
+
+Status possíveis:
+
+- Disponível
+- Vendida
+- Alugada
+- Bloqueada judicialmente
+- Abandonada
+- Leiloada
+- Invadida
+- Em investigação
+
+Funções da casa:
+
+- Moradia do personagem.
+- Guardar itens.
+- Guardar dinheiro físico, se permitido.
+- Guardar documentos.
+- Descansar.
+- Se esconder.
+- Receber visitas.
+- Criar cena privada.
+- Ter garagem.
+- Ter cofre.
+- Ter sistema de segurança.
+
+Ações do dono:
+
+[Entrar em casa]
+[Sair de casa]
+[Convidar jogador]
+[Expulsar visitante]
+[Trancar porta]
+[Destrancar porta]
+[Guardar item]
+[Retirar item]
+[Ver cofre]
+[Pagar imposto]
+[Colocar à venda]
+[Alugar]
+[Transferir propriedade]
+[Chamar polícia]
+[Instalar segurança]
+
+Ações de visitante:
+
+[Bater na porta]
+[Tocar campainha]
+[Entrar, se autorizado]
+[Sair]
+[Conversar]
+[Observar ambiente]
+
+Ações criminais:
+
+[Arrombar porta]
+[Invadir]
+[Revistar cômodo]
+[Roubar item]
+[Fugir]
+[Se esconder]
+
+Ações policiais:
+
+[Bater na porta]
+[Cumprir mandado]
+[Invadir com autorização]
+[Revistar propriedade]
+[Apreender item]
+[Preservar local]
+[Prender suspeito]
+
+Sistema de chaves:
+
+- Dono possui chave principal.
+- Dono pode dar chave temporária.
+- Dono pode remover acesso.
+- Chaves podem ser roubadas, se o sistema permitir.
+- Chaves devem gerar log.
+
+property_keys
+- id
+- propertyId
+- characterId
+- accessLevel
+- createdAt
+
+Níveis de acesso:
+
+- Dono
+- Morador
+- Visitante autorizado
+- Funcionário
+- Acesso temporário
+
+Impostos:
+
+Propriedades devem ter imposto periódico.
+
+Se o personagem não pagar:
+
+1. Recebe aviso.
+2. Casa fica em dívida.
+3. Prefeitura pode bloquear.
+4. Casa pode ir a leilão.
+5. Se o personagem morrer, a casa entra em espólio ou leilão.
+
+Morte do proprietário:
+
+Se personagem morrer definitivamente:
+
+- Casa não passa para o novo personagem.
+- Casa pode ser bloqueada.
+- Casa pode ir a leilão.
+- Casa pode ser investigada.
+- Itens ilegais podem ser apreendidos.
+- Itens comuns podem virar espólio do mundo, não do jogador morto.
+
+Importante:
+
+Novo personagem nunca deve herdar casa do personagem morto.
+
+====================================================================
+33. SISTEMA DE CARROS, MOTOS E VEÍCULOS
+====================================================================
+
+O jogo deve ter veículos.
+
+Tipos:
+
+- Carro popular.
+- Carro esportivo.
+- Moto simples.
+- Moto esportiva.
+- Caminhonete.
+- Van.
+- Caminhão.
+- Ambulância.
+- Viatura.
+- Guincho.
+- Veículo de empresa.
+- Veículo roubado.
+- Veículo apreendido.
+
+Cada veículo deve ter:
+
+vehicles
+- id
+- ownerCharacterId
+- companyId
+- model
+- type
+- plate
+- color
+- status
+- fuel
+- damage
+- locationId
+- garagePropertyId
+- isStolen
+- isImpounded
+- createdAt
+- updatedAt
+
+Status possíveis:
+
+- Na garagem
+- Estacionado
+- Em uso
+- Danificado
+- Roubado
+- Apreendido
+- Destruído
+- Bloqueado judicialmente
+
+Funções de veículos:
+
+- Transporte entre locais.
+- Fuga de crime.
+- Patrulha policial.
+- Ambulância.
+- Entrega.
+- Guincho.
+- Trabalho de empresa.
+- Armazenamento limitado no porta-malas.
+- Prova em investigação.
+
+Ações básicas:
+
+[Entrar no veículo]
+[Sair do veículo]
+[Ligar veículo]
+[Desligar veículo]
+[Dirigir]
+[Estacionar]
+[Guardar na garagem]
+[Abastecer]
+[Ver porta-malas]
+[Trancar]
+[Destrancar]
+
+Ações de mecânica:
+
+[Inspecionar veículo]
+[Reparar motor]
+[Trocar pneus]
+[Rebocar]
+[Pintar]
+[Instalar melhoria]
+[Remover melhoria]
+
+Ações criminais:
+
+[Arrombar veículo]
+[Fazer ligação direta]
+[Roubar veículo]
+[Usar veículo na fuga]
+[Clonar placa]
+[Abandonar veículo]
+[Queimar veículo]
+
+Ações policiais:
+
+[Consultar placa]
+[Parar veículo]
+[Revistar veículo]
+[Apreender veículo]
+[Registrar ocorrência]
+[Perseguir]
+[Montar bloqueio]
+[Emitir multa]
+
+Veículos devem ter documentos:
+
+- Placa
+- Registro
+- Dono
+- Multas
+- Situação legal
+- Seguro, se existir
+- Bloqueio judicial, se houver
+
+Sistema de garagem:
+
+- Casas podem ter vagas.
+- Garagens públicas podem guardar veículos.
+- Empresas podem ter garagem própria.
+- Delegacia tem pátio de apreensão.
+- Hospital tem garagem de ambulância.
+- Polícia tem garagem de viaturas.
+
+Morte do proprietário:
+
+Se personagem morrer:
+
+- Veículo não passa para novo personagem.
+- Pode ir a leilão.
+- Pode ser apreendido.
+- Pode ficar abandonado.
+- Pode virar prova se estiver envolvido em crime.
+
+Roubo de veículo:
+
+Roubar veículo deve gerar risco.
+
+Fatores considerados:
+
+- Local movimentado.
+- Alarme do veículo.
+- Habilidade de arrombamento.
+- Presença policial.
+- Câmeras.
+- Testemunhas.
+- Tempo de ação.
+
+Resultado possível:
+
+- Roubo bem-sucedido.
+- Alarme disparado.
+- Testemunha viu.
+- Polícia recebeu alerta.
+- Veículo travou.
+- Suspeito deixou prova.
+
+====================================================================
+34. LOGS E MODERAÇÃO
+====================================================================
+
+Logs são obrigatórios.
+
+O jogo deve registrar tudo que importa:
+
+- Login
+- Criação de personagem
+- Entrada em local
+- Saída de local
+- Fala
+- Ação clicada
+- Resultado de ação
+- Uso de item
+- Dano
+- Ferimento
+- Prisão
+- Morte
+- Transferência de dinheiro
+- Criação de empresa
+- Aprovação de documento
+- Ocorrência policial
+- Laudo médico
+- Ação de staff
+
+Em RP hardcore, logs são essenciais para evitar abuso.
+
+Toda morte permanente deve ter log detalhado.
+
+O sistema deve permitir denúncia:
+
+[Denunciar cena]
+[Enviar prova]
+[Solicitar revisão de morte]
+[Reportar anti-RP]
+[Reportar abuso de cargo]
+
+Staff deve ter painel para:
+
+- Ver jogadores online
+- Ver locais ativos
+- Ver logs de cena
+- Revisar mortes
+- Reverter morte injusta, se necessário
+- Aplicar punição
+- Banir
+- Alertar
+- Editar personagem em casos extremos
+- Ver economia
+- Ver empresas
+- Ver ocorrências
+
+====================================================================
+35. SISTEMA DE ADMINISTRADORES E MODERADORES
+====================================================================
+
+O jogo precisa ter sistema de administração e moderação.
+
+Existem níveis de permissão:
+
+1. DONO / MASTER ADMIN
+2. ADMIN
+3. MODERADOR
+4. SUPORTE
+5. JOGADOR
+
+Roles sugeridas:
+
+MASTER_ADMIN:
+- Acesso total.
+- Gerenciar admins.
+- Gerenciar moderadores.
+- Ver todos os logs.
+- Reverter morte injusta.
+- Banir contas.
+- Editar economia em casos extremos.
+- Gerenciar configuração global do jogo.
+
+ADMIN:
+- Ver logs.
+- Aplicar banimento.
+- Aplicar suspensão.
+- Revisar mortes.
+- Resolver denúncias.
+- Gerenciar personagens.
+- Gerenciar empresas.
+- Gerenciar casas.
+- Gerenciar veículos.
+- Gerenciar ocorrências.
+- Acompanhar cenas críticas.
+
+MODERADOR:
+- Ver denúncias.
+- Ver logs de cena.
+- Aplicar advertência.
+- Silenciar jogador.
+- Congelar personagem.
+- Encerrar cena abusiva.
+- Encaminhar caso para admin.
+- Ajudar novos jogadores.
+
+SUPORTE:
+- Responder dúvidas.
+- Ver chamados.
+- Auxiliar com bugs simples.
+- Encaminhar denúncias.
+- Não pode editar dinheiro, morte, itens ou cargos.
+
+JOGADOR:
+- Acesso normal ao jogo.
+
+Painel administrativo deve ter:
+
+- Lista de jogadores online.
+- Lista de personagens vivos.
+- Lista de personagens mortos.
+- Locais ativos.
+- Cenas em andamento.
+- Logs por local.
+- Logs por personagem.
+- Denúncias.
+- Mortes recentes.
+- Assaltos recentes.
+- Transferências financeiras.
+- Empresas.
+- Casas.
+- Veículos.
+- Banimentos.
+- Advertências.
+- Chamados de suporte.
+
+Ações administrativas:
+
+[Ver perfil da conta]
+[Ver personagem]
+[Ver logs]
+[Ver localização atual]
+[Congelar personagem]
+[Remover de cena]
+[Silenciar]
+[Advertir]
+[Suspender]
+[Banir]
+[Revisar morte]
+[Reverter morte, se for injusta]
+[Encerrar denúncia]
+[Adicionar observação interna]
+[Remover item ilegal por bug]
+[Corrigir erro de sistema]
+
+Sistema de denúncias:
+
+Jogador pode denunciar:
+
+- Anti-RP.
+- Powergaming.
+- Metagaming.
+- RDM.
+- Abuso de bug.
+- Abuso de cargo.
+- Morte injusta.
+- Ofensa.
+- Quebra de regra.
+- Abuso de VIP.
+- Exploração econômica.
+
+Cada denúncia deve ter:
+
+staff_reports
+- id
+- reporterUserId
+- reporterCharacterId
+- targetUserId
+- targetCharacterId
+- type
+- description
+- relatedLocationId
+- relatedActionLogId
+- status
+- assignedStaffId
+- resolution
+- createdAt
+- updatedAt
+
+Status da denúncia:
+
+- Aberta
+- Em análise
+- Aguardando prova
+- Resolvida
+- Recusada
+- Encaminhada para admin
+
+Toda ação de admin/mod deve gerar log.
+
+admin_logs
+- id
+- staffUserId
+- action
+- targetUserId
+- targetCharacterId
+- description
+- metadata
+- createdAt
+
+Regra importante:
+
+Admin e moderador nunca devem usar poder para beneficiar personagem próprio.
+
+Se um usuário for staff, o personagem dele deve continuar seguindo as mesmas regras dos outros.
+
+====================================================================
+36. SISTEMA ANTI-ABUSO
+====================================================================
+
+Como o jogo tem morte permanente, precisa de proteção contra abuso.
+
+Regras do sistema:
+
+- Matar personagem exige contexto.
+- Execução deve ter motivo RP registrado.
+- Ações letais geram aviso.
+- Personagem recém-criado pode ter proteção inicial limitada.
+- RDM deve ser punido.
+- Powergaming deve ser punido.
+- Metagaming deve ser punido.
+- Abuso de cargo público deve gerar consequência.
+- Logs devem permitir revisão.
+
+Execução deve exigir:
+
+- Motivo RP.
+- Cena anterior.
+- Conflito válido.
+- Registro automático.
+- Confirmação de risco.
+- Possibilidade de revisão pela staff.
+
+====================================================================
+37. PAINÉIS IMPORTANTES
+====================================================================
+
+Painel do jogador:
+
+- Personagem
+- Status
+- Local atual
+- Dinheiro
+- Inventário
+- Emprego
+- Ficha criminal
+- Saúde
+- Mensagens
+- Ocorrências
+- Histórico
+
+Painel da cidade:
+
+- Locais
+- Quantidade de jogadores por local
+- Risco por local
+- Eventos ativos
+- Serviços disponíveis
+
+Painel da polícia:
+
+- Ocorrências em andamento
+- Ocorrências pendentes
+- Suspeitos procurados
+- Mandados
+- Casos graves
+- Histórico de prisões
+
+Painel do hospital:
+
+- Pacientes aguardando
+- Pacientes em emergência
+- Internados
+- Laudos pendentes
+- Óbitos
+
+Painel da prefeitura:
+
+- Protocolos
+- Empresas
+- Alvarás
+- Impostos
+- Multas
+- Solicitações
+- Eleições
+
+Painel das empresas:
+
+- Funcionários
+- Caixa
+- Estoque
+- Serviços
+- Clientes
+- Salários
+- Impostos
+- Histórico financeiro
+
+Painel da staff:
+
+- Logs
+- Denúncias
+- Mortes
+- Economia
+- Jogadores
+- Locais
+- Empresas
+- Ações críticas
+
+====================================================================
+38. DADOS IMPORTANTES NO BANCO
+====================================================================
+
+Tabelas sugeridas:
+
+users
+- id
+- email
+- passwordHash
+- username
+- role
+- isBanned
+- banReason
+- createdAt
+- updatedAt
+- lastLoginAt
+
+characters
+- id
+- userId
+- name
+- age
+- story
+- status
+- lifeStatus
+- healthStatus
+- emotionalStatus
+- currentLocationId
+- cash
+- bankBalance
+- jobId
+- companyId
+- factionId
+- isDead
+- deathRecordId
+- createdAt
+- updatedAt
+
+locations
+- id
+- name
+- description
+- riskLevel
+- type
+- isActive
+- createdAt
+
+location_connections
+- id
+- fromLocationId
+- toLocationId
+
+location_messages
+- id
+- locationId
+- characterId
+- type
+- content
+- systemGenerated
+- createdAt
+
+actions
+- id
+- key
+- name
+- category
+- riskLevel
+- requiresConfirmation
+- createdAt
+
+action_logs
+- id
+- characterId
+- locationId
+- actionKey
+- result
+- metadata
+- createdAt
+
+jobs
+- id
+- name
+- type
+- institution
+- salary
+- permissions
+
+companies
+- id
+- name
+- type
+- ownerCharacterId
+- cash
+- status
+- licenseStatus
+- createdAt
+
+company_employees
+- id
+- companyId
+- characterId
+- role
+- salary
+
+bank_accounts
+- id
+- characterId
+- companyId
+- balance
+- blocked
+- createdAt
+
+inventory_items
+- id
+- characterId
+- itemKey
+- quantity
+- metadata
+
+police_reports
+- id
+- type
+- status
+- locationId
+- suspectCharacterId
+- victimCharacterId
+- description
+- evidence
+- createdAt
+
+medical_records
+- id
+- characterId
+- doctorCharacterId
+- status
+- description
+- treatment
+- createdAt
+
+government_protocols
+- id
+- characterId
+- type
+- status
+- description
+- assignedToCharacterId
+- createdAt
+
+death_records
+- id
+- characterId
+- locationId
+- cause
+- context
+- reviewed
+- createdAt
+
+npc_fallback_events
+- id
+- type
+- locationId
+- characterId
+- reason
+- result
+- createdAt
+
+staff_reports
+- id
+- reporterUserId
+- reporterCharacterId
+- targetUserId
+- targetCharacterId
+- type
+- description
+- relatedLocationId
+- relatedActionLogId
+- status
+- assignedStaffId
+- resolution
+- createdAt
+- updatedAt
+
+character_skills
+- id
+- characterId
+- skillKey
+- value
+- xp
+- updatedAt
+
+skill_logs
+- id
+- characterId
+- skillKey
+- xpGained
+- reason
+- sourceActionLogId
+- createdAt
+
+character_reputations
+- id
+- characterId
+- reputationType
+- value
+- updatedAt
+
+reputation_logs
+- id
+- characterId
+- reputationType
+- amount
+- reason
+- sourceActionLogId
+- createdAt
+
+subscriptions
+- id
+- userId
+- planName
+- price
+- status
+- startedAt
+- expiresAt
+- paymentProvider
+- paymentReference
+- createdAt
+- updatedAt
+
+properties
+- id
+- name
+- type
+- locationId
+- ownerCharacterId
+- price
+- rentPrice
+- taxAmount
+- status
+- storageLimit
+- garageSlots
+- securityLevel
+- isForSale
+- isForRent
+- createdAt
+- updatedAt
+
+property_keys
+- id
+- propertyId
+- characterId
+- accessLevel
+- createdAt
+
+property_storage_items
+- id
+- propertyId
+- itemKey
+- quantity
+- metadata
+- createdAt
+- updatedAt
+
+vehicles
+- id
+- ownerCharacterId
+- companyId
+- model
+- type
+- plate
+- color
+- status
+- fuel
+- damage
+- locationId
+- garagePropertyId
+- isStolen
+- isImpounded
+- createdAt
+- updatedAt
+
+vehicle_keys
+- id
+- vehicleId
+- characterId
+- accessLevel
+- createdAt
+
+vehicle_trunk_items
+- id
+- vehicleId
+- itemKey
+- quantity
+- metadata
+- createdAt
+- updatedAt
+
+admin_logs
+- id
+- staffUserId
+- action
+- targetUserId
+- targetCharacterId
+- description
+- metadata
+- createdAt
+
+====================================================================
+39. MVP INICIAL
+====================================================================
+
+O MVP não precisa ter tudo pronto no primeiro dia.
+
+Primeira versão jogável deve ter:
+
+1. Login
+2. Senha
+3. Cadastro de conta
+4. Criação de personagem
+5. Personagem vivo/morto
+6. Cidade por locais
+7. Entrar e sair de locais
+8. Chat/cena por local
+9. Botões básicos de ação
+10. Banco simples
+11. Hospital simples
+12. Polícia simples
+13. Sistema NPC fallback básico
+14. Logs de ações
+15. Interface mobile-first
+16. Tema visual de jogo/app
+17. Morte permanente básica
+18. Painel admin básico
+19. Sistema inicial de habilidades
+20. Sistema inicial de reputação
+21. Estrutura preparada para VIP
+22. Estrutura preparada para casas
+23. Estrutura preparada para veículos
+
+Locais iniciais do MVP:
+
+- Praça Central
+- Banco Central
+- Hospital
+- Delegacia
+- Prefeitura
+- Mercado
+- Mecânica
+- Beco Industrial
+
+Ações iniciais:
+
+[Conversar]
+[Observar]
+[Entrar]
+[Sair]
+[Solicitar atendimento]
+[Sacar dinheiro]
+[Depositar]
+[Chamar polícia]
+[Solicitar médico]
+[Sacar arma]
+[Assaltar]
+[Se render]
+[Fugir]
+
+====================================================================
+40. FASES DE DESENVOLVIMENTO
+====================================================================
+
+FASE 1 — Base jogável
+
+- Login
+- Cadastro
+- Senha com hash
+- Personagem
+- Locais
+- Chat por local
+- Ações por botão
+- Logs
+- Interface mobile
+- Banco simples
+- Hospital simples
+- Polícia simples
+- Admin básico
+
+FASE 2 — Cidade viva
+
+- Profissões
+- Empresas
+- Prefeitura
+- Banco com funcionários
+- Ocorrências pendentes
+- Inventário
+- Dinheiro
+- NPC fallback melhorado
+- Casas básicas
+- Veículos básicos
+
+FASE 3 — Hardcore real
+
+- Ferimentos complexos
+- Morte permanente
+- Investigação
+- Prisão
+- Tribunal
+- Assalto a banco
+- Facções
+- Lavagem de dinheiro
+- Reputação
+- Habilidades avançadas
+- Sistema de medo avançado
+
+FASE 4 — Monetização e app-like avançado
+
+- VIP de R$ 25,00
+- Pagamento automático
+- PWA instalável
+- Notificações
+- Animações
+- Mapa visual
+- Painéis profissionais
+- Melhorias UX mobile
+- Eventos globais
+- Temporadas
+
+====================================================================
+41. EXPERIÊNCIA DO JOGADOR
+====================================================================
+
+Fluxo inicial:
+
+1. Usuário cria conta.
+2. Faz login.
+3. Cria personagem.
+4. Escolhe história.
+5. Entra na cidade.
+6. Aparece na Praça Central.
+7. Pode procurar emprego.
+8. Pode interagir com locais.
+9. Pode trabalhar.
+10. Pode comprar casa.
+11. Pode comprar carro ou moto.
+12. Pode entrar no crime.
+13. Pode abrir empresa.
+14. Pode virar policial, médico, funcionário público etc.
+15. Pode evoluir habilidades.
+16. Pode ganhar reputação.
+17. Pode virar VIP.
+18. Pode morrer permanentemente se tomar decisões ruins.
+
+O jogador deve sentir:
+
+- Medo de morrer.
+- Valor no progresso.
+- Importância das escolhas.
+- Peso nas consequências.
+- Necessidade de outros jogadores.
+- Imersão de cidade viva.
+- Orgulho por evoluir o personagem.
+- Cuidado ao arriscar patrimônio, casa, carro, moto e reputação.
+
+====================================================================
+42. REGRAS DE IMPLEMENTAÇÃO PARA O CODEX
+====================================================================
+
+Ao implementar este projeto:
+
+1. Priorizar mobile-first.
+2. Não usar comandos de texto como base.
+3. Usar botões clicáveis e ações contextuais.
+4. Fazer o chat como linha do tempo narrativa.
+5. Registrar logs de todas as ações importantes.
+6. Criar sistema "jogador primeiro, NPC depois".
+7. Não transformar NPC em protagonista.
+8. Não facilitar morte permanente.
+9. Não remover funcionalidades sem autorização.
+10. Separar frontend e backend.
+11. Usar banco PostgreSQL.
+12. Usar Prisma.
+13. Preparar deploy para Railway.
+14. Manter documentação em /docs.
+15. Criar código claro, modular e expansível.
+16. Criar login e senha desde o início.
+17. Salvar senha apenas como hash.
+18. Criar roles de usuário: player, support, moderator, admin, master_admin.
+19. Criar painel admin básico no MVP.
+20. Criar sistema de casas como módulo separado.
+21. Criar sistema de veículos como módulo separado.
+22. Criar sistema VIP preparado no banco, mesmo que pagamento seja manual no início.
+23. VIP custa R$ 25,00 por mês.
+24. VIP dá 2x salário legal e 2x reputação permitida.
+25. VIP não pode dar vantagem em combate, tiro, morte ou sobrevivência.
+26. Criar sistema de habilidades por personagem.
+27. Habilidades sobem com ações reais.
+28. Criar proteção anti-farm de XP.
+29. Habilidade influencia medo, tiro, negociação, medicina, crime, polícia e profissões.
+30. Reputação deve ser separada de habilidade.
+31. Morte permanente deve apagar acesso aos bens do personagem.
+32. Casa, carro e moto não passam para novo personagem.
+33. Toda ação crítica deve gerar log.
+34. Toda ação de admin deve gerar log.
+35. O jogo deve continuar mobile-first e com aparência de app.
+
+O objetivo não é criar apenas um chat.
+O objetivo é criar uma cidade RP hardcore, sistêmica e viva.
+
+====================================================================
+43. FRASES DE MARCA
+====================================================================
+
+Nome:
+Vida Única RP
+
+Subtítulo:
+Roleplay textual hardcore com morte permanente.
+
+Frases possíveis:
+
+"Uma vida. Uma história. Nenhuma segunda chance."
+
+"Sem respawn. Sem personagem imortal."
+
+"Aqui, cada escolha importa. Cada erro pode ser o último."
+
+"Você não joga para vencer. Você joga para sobreviver."
+
+"Viver já é vencer."
+
+====================================================================
+44. RESUMO FINAL
+====================================================================
+
+Vida Única RP é um jogo de roleplay textual hardcore para mobile/navegador, com aparência de app, onde tudo acontece por botões clicáveis e cenas por local.
+
+O mundo depende de jogadores:
+- Banco com funcionários jogadores.
+- Hospital com médicos jogadores.
+- Polícia com policiais jogadores.
+- Prefeitura com funcionários jogadores.
+- Empresas com donos e empregados jogadores.
+- Até cargos pequenos têm função real.
+
+Quando não houver jogadores disponíveis, NPCs oferecem soluções limitadas para não travar o jogo.
+
+A regra principal é morte permanente:
+- Morreu definitivamente, perdeu tudo.
+- A conta continua.
+- O personagem acaba.
+- Novo personagem começa do zero.
+
+O jogo deve ter:
+- Login.
+- Senha.
+- Conta de usuário.
+- Sistema de admin.
+- Sistema de moderador.
+- Sistema de suporte.
+- Painel administrativo.
+- Denúncias.
+- Cidade por locais.
+- Chat/cena por local.
+- Botões contextuais.
+- Profissões reais.
+- Empresas.
+- Banco.
+- Hospital.
+- Polícia Militar.
+- Polícia Civil.
+- Prefeitura.
+- Justiça.
+- Crime.
+- Economia difícil.
+- Sistema VIP de R$ 25,00.
+- 2x salário legal para VIP.
+- 2x reputação permitida para VIP.
+- Inventário.
+- Casas.
+- Apartamentos.
+- Propriedades.
+- Garagens.
+- Carros.
+- Motos.
+- Veículos de empresa.
+- Viaturas.
+- Ambulâncias.
+- Guinchos.
+- Sistema de habilidades.
+- Sistema de XP.
+- Sistema de medo.
+- Sistema de progressão por profissão.
+- Habilidade de tiro.
+- Habilidade policial.
+- Habilidade criminal.
+- Habilidade médica.
+- Habilidade civil.
+- Reputação separada de habilidade.
+- Ferimentos.
+- Morte permanente.
+- Logs completos.
+- NPC fallback.
+- Interface mobile-first.
+- Deploy usando GitHub + Railway.
+
+Objetivo final:
+Criar uma cidade viva, séria e hardcore, onde cada profissão importa, cada ação deixa rastro, cada patrimônio tem valor e cada personagem só tem uma vida.
