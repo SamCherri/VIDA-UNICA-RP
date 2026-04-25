@@ -38,7 +38,7 @@ export function ActionsScreen({
 
   return (
     <section className="card">
-      <h3>Ações contextuais</h3>
+      <h3>O que fazer</h3>
       {Object.entries(basicGroups).map(([group, groupedActions]) => (
         <div key={group} className="action-group">
           <h4>{group}</h4>
@@ -53,11 +53,11 @@ export function ActionsScreen({
       ))}
 
       <div className="action-group">
-        <h4>Ações profissionais</h4>
+        <h4>Ações da profissão</h4>
         {!hasLocation ? (
-          <p className="section-subtitle">Entre em um local para ver ações disponíveis.</p>
+          <p className="section-subtitle">Entre em um local da cidade para ver ações disponíveis.</p>
         ) : !hasProfessionalActions ? (
-          <p className="section-subtitle">Nenhuma ação profissional disponível para sua profissão neste local.</p>
+          <p className="section-subtitle">Nenhuma ação de profissão disponível para sua vida neste local.</p>
         ) : (
           Object.entries(professionalGroups)
             .filter(([group]) => group !== "Comum")

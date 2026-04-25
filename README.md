@@ -1,6 +1,39 @@
 # VIDA ÚNICA RP
 
-Web app **mobile-first** de roleplay hardcore por cenas visuais, com vida única por personagem, ações contextuais por botão e backend preparado para PostgreSQL/Prisma em Railway.
+Jogo/simulador de vida RP **mobile-first**, instalável no celular como **PWA**, com cidade viva, profissões, rotina, decisões e consequências.
+
+## Direção de produto
+
+O VIDA ÚNICA RP não tenta competir com jogos 2D/3D por gráfico.
+Ele compete por profundidade social, rotina, profissões, consequências, presença de jogadores e cidade viva.
+
+- O jogador não apenas conversa: ele vive uma rotina dentro da cidade.
+- Profissões pequenas importam.
+- Cada ação pode deixar rastro.
+- NPCs existem para evitar travamento, mas quem move a cidade são os jogadores.
+
+## Instalação no celular
+
+O jogo roda como PWA.
+
+No Android (Chrome):
+1. Abra a URL publicada do jogo.
+2. Toque em **⋮**.
+3. Escolha **Adicionar à tela inicial** ou **Instalar app**.
+4. Abra pelo ícone para jogar em tela cheia, com aparência de jogo mobile.
+
+Futuramente, o projeto pode ser empacotado como APK.
+
+## Identidade de jogo mobile
+
+O projeto deve parecer jogo instalado:
+
+- tela cheia;
+- ícone próprio;
+- menu inferior;
+- botões grandes;
+- tema urbano escuro;
+- experiência vertical/mobile-first.
 
 ## Objetivo do MVP
 
@@ -208,8 +241,19 @@ Próximos passos recomendados:
 
 ## Próximas fases
 
-1. Realtime (SSE/WebSocket) para cena em tempo real.
-2. Evolução do sistema de profissões e fluxos institucionais (polícia, hospital, prefeitura).
-3. Economia avançada (empresas, empregos, inventário).
-4. Regras de combate/ferimentos/morte com simulação de risco.
-5. Evolução do painel admin e trilha de auditoria completa.
+1. UX de simulador de vida e tela "Agora/Local".
+2. PWA instalável e identidade de jogo mobile.
+3. Rotina/trabalho e progressão institucional.
+4. Protocolos institucionais.
+5. Economia, inventário e empresas.
+6. Propriedades e veículos.
+7. Regras avançadas de risco, ferimentos e morte.
+
+## Validação rápida de build (pré-merge)
+
+Antes de abrir/mesclar PR, execute:
+
+```bash
+npm run build -w @vida-unica/web
+npm run build -w @vida-unica/api
+```

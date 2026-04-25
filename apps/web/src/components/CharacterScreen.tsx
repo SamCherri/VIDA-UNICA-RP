@@ -39,7 +39,7 @@ export function CharacterScreen({
 }: CharacterScreenProps) {
   return (
     <section className="card">
-      <h3>Ficha do personagem</h3>
+      <h3>Minha vida</h3>
       <article className="character-sheet">
         <p>
           <strong>Nome:</strong> {character.name}
@@ -67,7 +67,7 @@ export function CharacterScreen({
         </p>
       </article>
 
-      <h4>Histórico de personagens mortos</h4>
+      <h4>Vidas encerradas</h4>
       {deadHistory.length === 0 ? (
         <p className="section-subtitle">Nenhum personagem morto registrado.</p>
       ) : (
@@ -81,7 +81,7 @@ export function CharacterScreen({
         </ul>
       )}
 
-      <h4>Trocar profissão</h4>
+      <h4>Profissão atual</h4>
       <p className="section-subtitle">Nesta fase, a troca de profissão é livre para testes.</p>
       <select value={selectedProfession} onChange={(e) => onProfessionChange(e.target.value as Profession)}>
         {professions.map((profession) => (

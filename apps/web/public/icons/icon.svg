@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title desc">
+  <title id="title">Vida Única RP</title>
+  <desc id="desc">Ícone escuro urbano com letras VU</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#1b2740"/>
+      <stop offset="100%" stop-color="#090b12"/>
+    </linearGradient>
+    <linearGradient id="panel" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#253a61"/>
+      <stop offset="100%" stop-color="#1a2944"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="112" fill="url(#bg)"/>
+  <rect x="56" y="56" width="400" height="400" rx="84" fill="url(#panel)" stroke="#4a79d8" stroke-width="10"/>
+  <rect x="120" y="290" width="40" height="80" rx="6" fill="#37598f"/>
+  <rect x="176" y="250" width="44" height="120" rx="6" fill="#2f4d7d"/>
+  <rect x="236" y="220" width="48" height="150" rx="6" fill="#436ba8"/>
+  <rect x="300" y="260" width="44" height="110" rx="6" fill="#355888"/>
+  <text x="256" y="222" text-anchor="middle" font-size="140" font-family="Inter, Arial, sans-serif" font-weight="800" fill="#d9e7ff">VU</text>
+</svg>
