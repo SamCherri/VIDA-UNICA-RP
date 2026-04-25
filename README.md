@@ -12,6 +12,10 @@ Ele compete por profundidade social, rotina, profissões, consequências, presen
 - Cada ação pode deixar rastro.
 - NPCs existem para evitar travamento, mas quem move a cidade são os jogadores.
 
+## Correção de fluxo principal
+
+A tela **Agora** é o centro da experiência. A aba **Fazer** foi ocultada do menu até que as ações avançadas tenham lógica real. Ações perigosas ou econômicas sem sistema completo não devem aparecer no fluxo principal.
+
 ## Instalação no celular
 
 O jogo roda como PWA.

@@ -219,16 +219,16 @@ button.danger {
   display: flex;
   flex-direction: column;
   gap: 8px;
-  max-height: 45vh;
+  max-height: 38vh;
   overflow: auto;
   padding-right: 4px;
 }
 
 .timeline-item {
   border-radius: 12px;
-  padding: 10px;
+  padding: 9px 10px;
   border: 1px solid #2e3b52;
-  background: #101826;
+  background: #121b2a;
 }
 
 .timeline-item strong {
@@ -248,7 +248,8 @@ button.danger {
 }
 
 .msg-system {
-  border-left: 3px solid #8ab2ff;
+  border-left: 3px solid #5f738f;
+  background: #0f1621;
 }
 
 .msg-action {
@@ -281,7 +282,7 @@ button.danger {
 }
 
 .action-group h4 {
-  color: #9fc3f7;
+  color: #c8d9f5;
 }
 
 .actions-grid {
@@ -345,7 +346,7 @@ button.danger {
   transform: translateX(-50%);
   width: min(520px, 100%);
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
+  grid-template-columns: repeat(4, 1fr);
   gap: 6px;
   background: rgba(9, 13, 21, 0.95);
   border-top: 1px solid #2a3342;
@@ -496,11 +497,17 @@ button.danger {
 
 .now-header-card,
 .now-situation-card,
+.now-speech,
 .now-events {
-  border: 1px solid #2b3d57;
+  border: 1px solid #253248;
   border-radius: 14px;
-  background: linear-gradient(180deg, #101d2f, #0f1827);
+  background: linear-gradient(180deg, #111a29, #0f1725);
   padding: 12px;
+}
+
+.now-header-card {
+  border-color: #335685;
+  background: linear-gradient(180deg, #12233b, #101b2d);
 }
 
 .now-header-card h4 {
@@ -521,7 +528,7 @@ button.danger {
 }
 
 .now-header-meta span {
-  color: #8ec0ff;
+  color: #a7cbff;
   font-weight: 700;
 }
 
@@ -536,12 +543,20 @@ button.danger {
 }
 
 .now-situation-card small {
-  color: #8ec0ff;
+  color: #9bb7dc;
   font-weight: 600;
 }
 
 .now-quick-actions .actions-grid {
   grid-template-columns: 1fr 1fr;
+}
+
+.now-speech h4 {
+  margin-bottom: 8px;
+}
+
+.now-speech textarea {
+  margin-top: 0;
 }
 
 .now-empty-state button {
@@ -554,6 +569,11 @@ button.danger {
 
 .timeline-item strong {
   color: #e9f2ff;
+}
+
+.timeline-item-player {
+  border-color: #3f5f8b;
+  background: #142238;
 }
 
 .presence-panel {

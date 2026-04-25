@@ -1,11 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
-import { BASIC_SCENE_ACTIONS, PROFESSIONS, type AvailableSceneAction, type Profession } from "@vida-unica/shared";
+import { PROFESSIONS, type AvailableSceneAction, type Profession } from "@vida-unica/shared";
 import { apiRequest } from "./api/client";
 import { ErrorBanner } from "./components/ErrorBanner";
 import { AuthScreen } from "./components/AuthScreen";
 import { CityScreen } from "./components/CityScreen";
 import { SceneScreen } from "./components/SceneScreen";
-import { ActionsScreen } from "./components/ActionsScreen";
 import { CharacterScreen } from "./components/CharacterScreen";
 import { BottomNav } from "./components/BottomNav";
 import { InstallGamePrompt } from "./components/InstallGamePrompt";
@@ -45,7 +44,7 @@ export function App() {
   const [presence, setPresence] = useState<PresenceCharacter[]>([]);
   const [availableActions, setAvailableActions] = useState<AvailableSceneAction[]>([]);
   const [sceneUpdatedAt, setSceneUpdatedAt] = useState<Date | null>(null);
-  const [tab, setTab] = useState<"city" | "scene" | "actions" | "character" | "menu">("city");
+  const [tab, setTab] = useState<"city" | "scene" | "character" | "menu">("city");
   const [error, setError] = useState<string>("");
 
   const [loginForm, setLoginForm] = useState({ login: "", password: "" });
@@ -387,6 +386,7 @@ export function App() {
               speech={speech}
               lastUpdatedAt={sceneUpdatedAt}
               currentCharacterId={character.id}
+              currentCharacterName={character.name}
               professionalActions={availableActions}
               onSpeechChange={setSpeech}
               onSendSpeech={sendSpeech}
@@ -394,15 +394,6 @@ export function App() {
               onProfessionalAction={doProfessionalAction}
               onLeaveLocation={leaveLocation}
               onGoToCity={() => setTab("city")}
-            />
-          )}
-          {tab === "actions" && (
-            <ActionsScreen
-              actions={BASIC_SCENE_ACTIONS}
-              professionalActions={availableActions}
-              hasLocation={Boolean(currentLocation)}
-              onAction={doAction}
-              onProfessionalAction={doProfessionalAction}
             />
           )}
           {tab === "character" && (
