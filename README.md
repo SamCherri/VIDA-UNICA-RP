@@ -248,3 +248,12 @@ Próximos passos recomendados:
 5. Economia, inventário e empresas.
 6. Propriedades e veículos.
 7. Regras avançadas de risco, ferimentos e morte.
+
+## Validação rápida de build (pré-merge)
+
+Antes de abrir/mesclar PR, execute:
+
+```bash
+npm run build -w @vida-unica/web
+npm run build -w @vida-unica/api
+```
