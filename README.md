@@ -135,6 +135,7 @@ npm run dev:web
 - `GET /characters/me`
 - `GET /characters/history`
 - `POST /characters/:id/mark-dead`
+- `POST /characters/me/profession`
 
 ### Locations
 - `GET /locations`
@@ -144,8 +145,11 @@ npm run dev:web
 
 ### Scene
 - `GET /locations/:id/messages`
+- `GET /locations/:id/presence`
+- `GET /locations/:id/available-actions`
 - `POST /locations/:id/say`
 - `POST /locations/:id/action`
+- `POST /locations/:id/professional-action`
 
 ### Admin
 - `GET /admin/users`
@@ -176,10 +180,36 @@ npm run dev:web
 - Sem comando textual `/me`, `/diz`, `/grita` como mecânica base.
 - Ações por botões + caixa de fala simples.
 
+## Profissões iniciais e fluxos institucionais (fase atual)
+
+Profissões aceitas no MVP desta fase:
+- `Desempregado` (fallback padrão quando não houver profissão definida)
+- `Atendente do Hospital`
+- `Caixa de Banco`
+- `Segurança`
+- `Policial`
+
+Locais com ações profissionais:
+- **Hospital** (Atendente do Hospital)
+- **Banco Central** (Caixa de Banco e Segurança)
+- **Delegacia** (Policial)
+- **Praça Central** (Policial)
+- **Beco Industrial** (Policial)
+
+Limitações desta fase:
+- Troca de profissão é livre para testes (sem processo seletivo ou aprovação).
+- Ação profissional só gera mensagem narrativa na cena + log de auditoria.
+- Sem efeitos econômicos, inventário, salários, XP, hierarquia ou sistema jurídico completo.
+
+Próximos passos recomendados:
+1. Fluxo de ingresso/aprovação por profissão.
+2. Efeitos institucionais progressivos (chamados, protocolos, filas).
+3. Integração futura com economia e progressão de carreira.
+
 ## Próximas fases
 
 1. Realtime (SSE/WebSocket) para cena em tempo real.
-2. Sistema de profissões e fluxos institucionais (polícia, hospital, prefeitura).
+2. Evolução do sistema de profissões e fluxos institucionais (polícia, hospital, prefeitura).
 3. Economia avançada (empresas, empregos, inventário).
 4. Regras de combate/ferimentos/morte com simulação de risco.
 5. Evolução do painel admin e trilha de auditoria completa.

@@ -1,3 +1,4 @@
+import type { Profession } from "@vida-unica/shared";
 import { StatusBadge } from "./StatusBadge";
 
 type Character = {
@@ -11,6 +12,11 @@ type Character = {
 
 type CharacterScreenProps = {
   character: Character;
+  professions: readonly Profession[];
+  selectedProfession: Profession;
+  onProfessionChange: (profession: Profession) => void;
+  onSaveProfession: () => void;
+  isSavingProfession: boolean;
   currentLocationName?: string;
   currentRiskLevel?: "LOW" | "MEDIUM" | "HIGH" | "EXTREME";
   deadHistory: Character[];
@@ -20,6 +26,11 @@ type CharacterScreenProps = {
 
 export function CharacterScreen({
   character,
+  professions,
+  selectedProfession,
+  onProfessionChange,
+  onSaveProfession,
+  isSavingProfession,
   currentLocationName,
   currentRiskLevel,
   deadHistory,
@@ -46,6 +57,9 @@ export function CharacterScreen({
           <strong>Dinheiro:</strong> R$ {character.moneyCash}
         </p>
         <p>
+          <strong>Profissão:</strong> {character.profession ?? "Desempregado"}
+        </p>
+        <p>
           <strong>Local atual:</strong> {currentLocationName ?? "Nenhum"}
         </p>
         <p>
@@ -66,6 +80,19 @@ export function CharacterScreen({
           ))}
         </ul>
       )}
+
+      <h4>Trocar profissão</h4>
+      <p className="section-subtitle">Nesta fase, a troca de profissão é livre para testes.</p>
+      <select value={selectedProfession} onChange={(e) => onProfessionChange(e.target.value as Profession)}>
+        {professions.map((profession) => (
+          <option key={profession} value={profession}>
+            {profession}
+          </option>
+        ))}
+      </select>
+      <button onClick={onSaveProfession} disabled={isSavingProfession}>
+        {isSavingProfession ? "Salvando..." : "Salvar profissão"}
+      </button>
 
       {canMarkDead && (
         <button className="danger" onClick={onMarkDead}>
