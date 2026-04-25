@@ -72,21 +72,17 @@ export async function applyRoutineDecay<T extends RoutineCharacter>(
   const elapsedHours = Math.floor(elapsedMs / HOUR_MS);
 
   if (elapsedHours <= 0) {
-    return updateCharacter(character.id, {
-      hunger: character.hunger,
-      thirst: character.thirst,
-      sleep: character.sleep,
-      energy: character.energy,
-      routineUpdatedAt: now
-    });
+    return character;
   }
+
+  const decayedAt = new Date(character.routineUpdatedAt.getTime() + elapsedHours * HOUR_MS);
 
   return updateCharacter(character.id, {
     hunger: clampNeed(character.hunger - DECAY_PER_HOUR.hunger * elapsedHours),
     thirst: clampNeed(character.thirst - DECAY_PER_HOUR.thirst * elapsedHours),
     sleep: clampNeed(character.sleep - DECAY_PER_HOUR.sleep * elapsedHours),
     energy: clampNeed(character.energy - DECAY_PER_HOUR.energy * elapsedHours),
-    routineUpdatedAt: now
+    routineUpdatedAt: decayedAt
   });
 }
 
