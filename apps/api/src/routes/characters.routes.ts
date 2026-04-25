@@ -1,9 +1,22 @@
 import { CharacterLifeStatus, Prisma } from "@prisma/client";
+import { PROFESSIONS } from "@vida-unica/shared";
 import type { FastifyInstance } from "fastify";
 import { z } from "zod";
 import { prisma } from "../lib/prisma.js";
 import { requireAuth } from "../middleware/auth.js";
 import { logAction } from "../services/log.service.js";
+
+const professionSchema = z.enum(PROFESSIONS);
+const DEFAULT_PROFESSION = "Desempregado";
+
+function sanitizeProfession(profession?: string) {
+  if (!profession?.trim()) {
+    return DEFAULT_PROFESSION;
+  }
+
+  const parsedProfession = professionSchema.safeParse(profession);
+  return parsedProfession.success ? parsedProfession.data : DEFAULT_PROFESSION;
+}
 
 export async function characterRoutes(app: FastifyInstance) {
   app.post("/characters", { preHandler: [requireAuth] }, async (request, reply) => {
@@ -16,6 +29,7 @@ export async function characterRoutes(app: FastifyInstance) {
         profession: z.string().max(80).optional()
       })
       .parse(request.body);
+    const safeProfession = sanitizeProfession(body.profession);
 
     const defaultLocation = await prisma.location.findFirst({ where: { name: "Praça Central" } });
 
@@ -35,6 +49,7 @@ export async function characterRoutes(app: FastifyInstance) {
             data: {
               userId: request.authUser.id,
               ...body,
+              profession: safeProfession,
               currentLocationId: defaultLocation?.id,
               moneyCash: 500,
               bankAccount: { create: { balance: 500 } }
@@ -131,5 +146,38 @@ export async function characterRoutes(app: FastifyInstance) {
     });
 
     return updated;
+  });
+
+  app.post("/characters/me/profession", { preHandler: [requireAuth] }, async (request, reply) => {
+    const body = z.object({ profession: professionSchema }).parse(request.body);
+
+    const character = await prisma.character.findFirst({
+      where: { userId: request.authUser.id, lifeStatus: CharacterLifeStatus.alive }
+    });
+
+    if (!character) {
+      return reply.code(404).send({ message: "Personagem vivo não encontrado." });
+    }
+
+    if (character.isFrozen) {
+      return reply.code(400).send({ message: "Personagem congelado não pode trocar de profissão." });
+    }
+
+    const updatedCharacter = await prisma.character.update({
+      where: { id: character.id },
+      data: { profession: body.profession },
+      include: { bankAccount: true, currentLocation: true }
+    });
+
+    await logAction({
+      userId: request.authUser.id,
+      characterId: character.id,
+      locationId: character.currentLocationId ?? undefined,
+      actionType: "profession_change",
+      description: `${character.name} mudou de profissão para ${body.profession}`,
+      metadata: { profession: body.profession }
+    });
+
+    return updatedCharacter;
   });
 }

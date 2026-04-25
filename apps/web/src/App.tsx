@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { BASIC_SCENE_ACTIONS } from "@vida-unica/shared";
+import { BASIC_SCENE_ACTIONS, PROFESSIONS, type AvailableSceneAction, type Profession } from "@vida-unica/shared";
 import { apiRequest } from "./api/client";
 import { ErrorBanner } from "./components/ErrorBanner";
 import { AuthScreen } from "./components/AuthScreen";
@@ -16,7 +16,7 @@ type Character = {
   name: string;
   age: number;
   lifeStatus: "alive" | "dead";
-  profession?: string;
+  profession?: Profession;
   moneyCash: number;
   currentLocation?: { id: string; name: string; riskLevel: "LOW" | "MEDIUM" | "HIGH" | "EXTREME" } | null;
   currentLocationId?: string | null;
@@ -26,6 +26,7 @@ type Message = { id: string; messageType: string; content: string; character?: {
 
 const adminRoles = new Set(["support", "moderator", "admin", "master_admin"]);
 const POLLING_INTERVAL_MS = 5000;
+const DEFAULT_PROFESSION: Profession = "Desempregado";
 
 function getErrorMessage(err: unknown) {
   if (err instanceof Error) return err.message;
@@ -41,6 +42,7 @@ export function App() {
   const [selectedLocation, setSelectedLocation] = useState<string>("");
   const [messages, setMessages] = useState<Message[]>([]);
   const [presence, setPresence] = useState<PresenceCharacter[]>([]);
+  const [availableActions, setAvailableActions] = useState<AvailableSceneAction[]>([]);
   const [sceneUpdatedAt, setSceneUpdatedAt] = useState<Date | null>(null);
   const [tab, setTab] = useState<"city" | "scene" | "actions" | "character" | "menu">("city");
   const [error, setError] = useState<string>("");
@@ -48,8 +50,16 @@ export function App() {
   const [loginForm, setLoginForm] = useState({ login: "", password: "" });
   const [registerForm, setRegisterForm] = useState({ username: "", email: "", password: "" });
   const [showRegister, setShowRegister] = useState(false);
-  const [charForm, setCharForm] = useState({ name: "", age: 18, story: "", appearance: "", profession: "" });
+  const [charForm, setCharForm] = useState<{ name: string; age: number; story: string; appearance: string; profession: Profession }>({
+    name: "",
+    age: 18,
+    story: "",
+    appearance: "",
+    profession: DEFAULT_PROFESSION
+  });
   const [speech, setSpeech] = useState("");
+  const [selectedProfession, setSelectedProfession] = useState<Profession>(DEFAULT_PROFESSION);
+  const [isSavingProfession, setIsSavingProfession] = useState(false);
 
   const currentLocation = useMemo(
     () => locations.find((location) => location.id === (character?.currentLocationId ?? character?.currentLocation?.id)),
@@ -57,18 +67,36 @@ export function App() {
   );
 
   async function refreshSceneData(authToken: string, locationId: string, silent = true) {
-    try {
-      const [updatedMessages, updatedPresence] = await Promise.all([
-        apiRequest<Message[]>(`/locations/${locationId}/messages`, "GET", undefined, authToken),
-        apiRequest<PresenceCharacter[]>(`/locations/${locationId}/presence`, "GET", undefined, authToken)
-      ]);
-      setMessages(updatedMessages);
-      setPresence(updatedPresence);
+    const [messagesResult, presenceResult] = await Promise.allSettled([
+      apiRequest<Message[]>(`/locations/${locationId}/messages`, "GET", undefined, authToken),
+      apiRequest<PresenceCharacter[]>(`/locations/${locationId}/presence`, "GET", undefined, authToken)
+    ]);
+
+    let hasSuccessfulUpdate = false;
+
+    if (messagesResult.status === "fulfilled") {
+      setMessages(messagesResult.value);
+      hasSuccessfulUpdate = true;
+    } else if (!silent) {
+      setError(getErrorMessage(messagesResult.reason));
+    }
+
+    if (presenceResult.status === "fulfilled") {
+      setPresence(presenceResult.value);
+      hasSuccessfulUpdate = true;
+    }
+
+    if (hasSuccessfulUpdate) {
       setSceneUpdatedAt(new Date());
-    } catch (err) {
-      if (!silent) {
-        setError(getErrorMessage(err));
-      }
+    }
+  }
+
+  async function refreshAvailableActions(authToken: string, locationId: string) {
+    try {
+      const actions = await apiRequest<AvailableSceneAction[]>(`/locations/${locationId}/available-actions`, "GET", undefined, authToken);
+      setAvailableActions(actions);
+    } catch {
+      setAvailableActions([]);
     }
   }
 
@@ -81,6 +109,7 @@ export function App() {
     ]);
     setUser(me);
     setCharacter(activeCharacter);
+    setSelectedProfession((activeCharacter?.profession as Profession | undefined) ?? DEFAULT_PROFESSION);
     setDeadHistory(history);
     setLocations(locationList);
   }
@@ -94,14 +123,21 @@ export function App() {
   }, [token]);
 
   useEffect(() => {
+    if (!character) return;
+    setSelectedProfession((character.profession as Profession | undefined) ?? DEFAULT_PROFESSION);
+  }, [character]);
+
+  useEffect(() => {
     if (!token || !currentLocation?.id) {
       setMessages([]);
       setPresence([]);
+      setAvailableActions([]);
       setSceneUpdatedAt(null);
       return;
     }
 
     void refreshSceneData(token, currentLocation.id, true);
+    void refreshAvailableActions(token, currentLocation.id);
 
     const intervalId = window.setInterval(() => {
       void refreshSceneData(token, currentLocation.id, true);
@@ -117,6 +153,7 @@ export function App() {
     setCharacter(null);
     setMessages([]);
     setPresence([]);
+    setAvailableActions([]);
     setSceneUpdatedAt(null);
   }
 
@@ -147,6 +184,7 @@ export function App() {
     try {
       const created = await apiRequest<Character>("/characters", "POST", charForm, token);
       setCharacter(created);
+      setSelectedProfession((created.profession as Profession | undefined) ?? DEFAULT_PROFESSION);
     } catch (err) {
       setError(getErrorMessage(err));
     }
@@ -182,6 +220,7 @@ export function App() {
       setCharacter(refreshed);
       setMessages([]);
       setPresence([]);
+      setAvailableActions([]);
       setSceneUpdatedAt(null);
     } catch (err) {
       setError(getErrorMessage(err));
@@ -208,6 +247,38 @@ export function App() {
       await refreshSceneData(token, currentLocation.id, false);
     } catch (err) {
       setError(getErrorMessage(err));
+    }
+  }
+
+  async function doProfessionalAction(actionId: string) {
+    if (!token || !currentLocation) return;
+    setError("");
+    try {
+      await apiRequest(`/locations/${currentLocation.id}/professional-action`, "POST", { actionId }, token);
+      await refreshSceneData(token, currentLocation.id, false);
+      await refreshAvailableActions(token, currentLocation.id);
+    } catch (err) {
+      setError(getErrorMessage(err));
+    }
+  }
+
+  async function saveProfession() {
+    if (!token) return;
+    setError("");
+    setIsSavingProfession(true);
+    try {
+      const updated = await apiRequest<Character>("/characters/me/profession", "POST", { profession: selectedProfession }, token);
+      setCharacter(updated);
+      setSelectedProfession((updated.profession as Profession | undefined) ?? DEFAULT_PROFESSION);
+      if (updated.currentLocationId) {
+        await refreshAvailableActions(token, updated.currentLocationId);
+      } else {
+        setAvailableActions([]);
+      }
+    } catch (err) {
+      setError(getErrorMessage(err));
+    } finally {
+      setIsSavingProfession(false);
     }
   }
 
@@ -270,11 +341,13 @@ export function App() {
             placeholder="Idade"
             onChange={(e) => setCharForm({ ...charForm, age: Number(e.target.value) })}
           />
-          <input
-            value={charForm.profession}
-            placeholder="Profissão"
-            onChange={(e) => setCharForm({ ...charForm, profession: e.target.value })}
-          />
+          <select value={charForm.profession} onChange={(e) => setCharForm({ ...charForm, profession: e.target.value as Profession })}>
+            {PROFESSIONS.map((profession) => (
+              <option key={profession} value={profession}>
+                {profession}
+              </option>
+            ))}
+          </select>
           <textarea value={charForm.story} placeholder="História" onChange={(e) => setCharForm({ ...charForm, story: e.target.value })} />
           <button onClick={createCharacter}>Criar personagem</button>
 
@@ -308,10 +381,23 @@ export function App() {
               onSendSpeech={sendSpeech}
             />
           )}
-          {tab === "actions" && <ActionsScreen actions={BASIC_SCENE_ACTIONS} onAction={doAction} />}
+          {tab === "actions" && (
+            <ActionsScreen
+              actions={BASIC_SCENE_ACTIONS}
+              professionalActions={availableActions}
+              hasLocation={Boolean(currentLocation)}
+              onAction={doAction}
+              onProfessionalAction={doProfessionalAction}
+            />
+          )}
           {tab === "character" && (
             <CharacterScreen
               character={character}
+              professions={PROFESSIONS}
+              selectedProfession={selectedProfession}
+              onProfessionChange={setSelectedProfession}
+              onSaveProfession={saveProfession}
+              isSavingProfession={isSavingProfession}
               currentLocationName={currentLocation?.name}
               currentRiskLevel={currentLocation?.riskLevel}
               deadHistory={deadHistory}

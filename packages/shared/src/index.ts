@@ -4,6 +4,15 @@ export type UserRole = (typeof USER_ROLES)[number];
 export const RISK_LEVELS = ["LOW", "MEDIUM", "HIGH", "EXTREME"] as const;
 export type RiskLevel = (typeof RISK_LEVELS)[number];
 
+export const PROFESSIONS = [
+  "Desempregado",
+  "Atendente do Hospital",
+  "Caixa de Banco",
+  "Segurança",
+  "Policial"
+] as const;
+export type Profession = (typeof PROFESSIONS)[number];
+
 export const BASIC_SCENE_ACTIONS = [
   "Conversar",
   "Observar",
@@ -19,3 +28,11 @@ export const BASIC_SCENE_ACTIONS = [
   "Se render",
   "Fugir"
 ] as const;
+
+export type AvailableSceneAction = {
+  id: string;
+  label: string;
+  category: "Comum" | "Hospital" | "Banco" | "Segurança" | "Polícia";
+  requiresProfession?: Profession;
+  riskLevel: RiskLevel;
+};
