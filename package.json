@@ -1,0 +1,27 @@
+{
+  "name": "vida-unica-rp",
+  "version": "0.1.0",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "concurrently \"npm run dev -w @vida-unica/api\" \"npm run dev -w @vida-unica/web\"",
+    "dev:api": "npm run dev -w @vida-unica/api",
+    "dev:web": "npm run dev -w @vida-unica/web",
+    "build": "npm run build -w @vida-unica/api && npm run build -w @vida-unica/web",
+    "prisma:generate": "prisma generate",
+    "prisma:migrate": "prisma migrate dev",
+    "prisma:deploy": "prisma migrate deploy",
+    "prisma:seed": "tsx prisma/seed.ts"
+  },
+  "devDependencies": {
+    "concurrently": "^9.2.1",
+    "prisma": "^6.8.2",
+    "tsx": "^4.20.6"
+  },
+  "dependencies": {
+    "@prisma/client": "^6.8.2"
+  }
+}
