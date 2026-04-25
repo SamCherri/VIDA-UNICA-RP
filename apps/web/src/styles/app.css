@@ -487,3 +487,126 @@ button.danger {
   width: auto;
   padding: 12px 14px;
 }
+
+.now-screen {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.now-header-card,
+.now-situation-card,
+.now-events {
+  border: 1px solid #2b3d57;
+  border-radius: 14px;
+  background: linear-gradient(180deg, #101d2f, #0f1827);
+  padding: 12px;
+}
+
+.now-header-card h4 {
+  margin: 0 0 6px;
+  font-size: 18px;
+}
+
+.now-header-card p {
+  margin: 0;
+  color: #c9dbf8;
+}
+
+.now-header-meta {
+  margin-top: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.now-header-meta span {
+  color: #8ec0ff;
+  font-weight: 700;
+}
+
+.now-header-meta small,
+.speech-help {
+  color: #95abc8;
+}
+
+.now-situation-card p {
+  margin: 0 0 8px;
+  color: #d8e6fa;
+}
+
+.now-situation-card small {
+  color: #8ec0ff;
+  font-weight: 600;
+}
+
+.now-quick-actions .actions-grid {
+  grid-template-columns: 1fr 1fr;
+}
+
+.now-empty-state button {
+  margin-top: 12px;
+}
+
+.msg-professional {
+  border-left: 3px solid #ffd27c;
+}
+
+.timeline-item strong {
+  color: #e9f2ff;
+}
+
+.presence-panel {
+  margin-bottom: 0;
+}
+
+.presence-item {
+  justify-content: space-between;
+}
+
+.presence-status {
+  border-radius: 999px;
+  padding: 3px 8px;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.presence-status-alive {
+  background: #1c3f32;
+  color: #9cf3ca;
+}
+
+.presence-status-dead {
+  background: #4a2230;
+  color: #ffc2cf;
+}
+
+.actions-grid .section-subtitle {
+  grid-column: 1 / -1;
+  margin: 0;
+}
+
+.life-cards-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.life-info-card {
+  border: 1px solid #2a3342;
+  border-radius: 12px;
+  background: #0f1624;
+  padding: 10px;
+  min-height: 74px;
+}
+
+.life-info-card small {
+  display: block;
+  color: #98aac5;
+  margin-bottom: 5px;
+}
+
+.life-info-card strong {
+  color: #edf3ff;
+}

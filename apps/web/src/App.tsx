@@ -378,12 +378,22 @@ export function App() {
           )}
           {tab === "scene" && (
             <SceneScreen
+              locationName={currentLocation?.name}
+              profession={character.profession ?? DEFAULT_PROFESSION}
+              moneyCash={character.moneyCash}
+              riskLevel={currentLocation?.riskLevel}
               messages={messages}
               presence={presence}
               speech={speech}
               lastUpdatedAt={sceneUpdatedAt}
+              currentCharacterId={character.id}
+              professionalActions={availableActions}
               onSpeechChange={setSpeech}
               onSendSpeech={sendSpeech}
+              onQuickAction={doAction}
+              onProfessionalAction={doProfessionalAction}
+              onLeaveLocation={leaveLocation}
+              onGoToCity={() => setTab("city")}
             />
           )}
           {tab === "actions" && (

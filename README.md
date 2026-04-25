@@ -239,6 +239,20 @@ Próximos passos recomendados:
 2. Efeitos institucionais progressivos (chamados, protocolos, filas).
 3. Integração futura com economia e progressão de carreira.
 
+## UX atual: Tela Agora/Local
+
+A tela **Agora** é o centro da experiência do simulador de vida RP.
+
+Nela o jogador visualiza rapidamente:
+- local atual;
+- profissão e dinheiro em mãos;
+- presença de pessoas no local;
+- risco do local;
+- situação narrativa do ambiente;
+- ações imediatas para continuar a rotina.
+
+A aba **Fazer** continua como lista completa de ações, enquanto a aba **Agora** prioriza decisões rápidas do momento.
+
 ## Próximas fases
 
 1. UX de simulador de vida e tela "Agora/Local".
