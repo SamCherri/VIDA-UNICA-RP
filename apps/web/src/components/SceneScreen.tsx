@@ -102,7 +102,7 @@ export function SceneScreen({
   onGoToCity
 }: SceneScreenProps) {
   const speechRef = useRef<HTMLTextAreaElement | null>(null);
-  const recentMessages = useMemo(() => messages.slice(0, 8), [messages]);
+  const recentMessages = useMemo(() => messages.slice(-8), [messages]);
   const groupedMessages = useMemo(() => groupConsecutiveMessages(recentMessages), [recentMessages]);
 
   if (!locationName || !riskLevel) {
