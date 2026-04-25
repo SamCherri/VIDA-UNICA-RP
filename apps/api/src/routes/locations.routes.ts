@@ -113,6 +113,25 @@ export async function locationRoutes(app: FastifyInstance) {
     return { ok: true };
   });
 
+
+  app.get("/locations/:id/presence", { preHandler: [requireAuth] }, async (request) => {
+    const { id } = z.object({ id: z.string().cuid() }).parse(request.params);
+
+    return prisma.character.findMany({
+      where: {
+        currentLocationId: id,
+        lifeStatus: CharacterLifeStatus.alive
+      },
+      select: {
+        id: true,
+        name: true,
+        profession: true,
+        lifeStatus: true
+      },
+      orderBy: { name: "asc" }
+    });
+  });
+
   app.get("/locations/:id/messages", { preHandler: [requireAuth] }, async (request) => {
     const { id } = z.object({ id: z.string().cuid() }).parse(request.params);
 

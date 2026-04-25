@@ -374,3 +374,73 @@ button.danger {
   padding: 8px 0;
   border-bottom: 1px solid #2a3342;
 }
+
+.scene-live-indicator {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 12px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid #2f4669;
+  background: #0e1a2c;
+  color: #b9d8ff;
+}
+
+.scene-live-dot {
+  color: #79ccff;
+  font-size: 14px;
+  line-height: 1;
+}
+
+.scene-live-indicator small {
+  color: #96acc9;
+}
+
+.presence-panel {
+  margin-bottom: 12px;
+  border: 1px solid #2a3342;
+  border-radius: 12px;
+  padding: 10px;
+  background: #0f1623;
+}
+
+.presence-panel h4 {
+  margin: 0 0 8px;
+  color: #b7cdf0;
+}
+
+.presence-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.presence-item {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  border: 1px solid #2b3850;
+  border-radius: 10px;
+  background: #111c2c;
+  padding: 8px 10px;
+}
+
+.presence-avatar {
+  font-size: 18px;
+}
+
+.presence-item small {
+  display: block;
+  color: #99abc6;
+}
+
+.presence-empty {
+  margin: 0;
+  color: #95a5be;
+  font-size: 13px;
+}

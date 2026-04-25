@@ -8,6 +8,7 @@ import { SceneScreen } from "./components/SceneScreen";
 import { ActionsScreen } from "./components/ActionsScreen";
 import { CharacterScreen } from "./components/CharacterScreen";
 import { BottomNav } from "./components/BottomNav";
+import type { PresenceCharacter } from "./components/PresencePanel";
 
 type User = { id: string; username: string; role: string; email: string };
 type Character = {
@@ -24,6 +25,7 @@ type Location = { id: string; name: string; description: string; riskLevel: "LOW
 type Message = { id: string; messageType: string; content: string; character?: { name: string } | null; createdAt: string };
 
 const adminRoles = new Set(["support", "moderator", "admin", "master_admin"]);
+const POLLING_INTERVAL_MS = 5000;
 
 function getErrorMessage(err: unknown) {
   if (err instanceof Error) return err.message;
@@ -38,6 +40,8 @@ export function App() {
   const [locations, setLocations] = useState<Location[]>([]);
   const [selectedLocation, setSelectedLocation] = useState<string>("");
   const [messages, setMessages] = useState<Message[]>([]);
+  const [presence, setPresence] = useState<PresenceCharacter[]>([]);
+  const [sceneUpdatedAt, setSceneUpdatedAt] = useState<Date | null>(null);
   const [tab, setTab] = useState<"city" | "scene" | "actions" | "character" | "menu">("city");
   const [error, setError] = useState<string>("");
 
@@ -51,6 +55,22 @@ export function App() {
     () => locations.find((location) => location.id === (character?.currentLocationId ?? character?.currentLocation?.id)),
     [locations, character]
   );
+
+  async function refreshSceneData(authToken: string, locationId: string, silent = true) {
+    try {
+      const [updatedMessages, updatedPresence] = await Promise.all([
+        apiRequest<Message[]>(`/locations/${locationId}/messages`, "GET", undefined, authToken),
+        apiRequest<PresenceCharacter[]>(`/locations/${locationId}/presence`, "GET", undefined, authToken)
+      ]);
+      setMessages(updatedMessages);
+      setPresence(updatedPresence);
+      setSceneUpdatedAt(new Date());
+    } catch (err) {
+      if (!silent) {
+        setError(getErrorMessage(err));
+      }
+    }
+  }
 
   async function bootstrap(authToken: string) {
     const me = await apiRequest<User>("/auth/me", "GET", undefined, authToken);
@@ -76,12 +96,18 @@ export function App() {
   useEffect(() => {
     if (!token || !currentLocation?.id) {
       setMessages([]);
+      setPresence([]);
+      setSceneUpdatedAt(null);
       return;
     }
 
-    apiRequest<Message[]>(`/locations/${currentLocation.id}/messages`, "GET", undefined, token)
-      .then(setMessages)
-      .catch((err) => setError(getErrorMessage(err)));
+    void refreshSceneData(token, currentLocation.id, true);
+
+    const intervalId = window.setInterval(() => {
+      void refreshSceneData(token, currentLocation.id, true);
+    }, POLLING_INTERVAL_MS);
+
+    return () => window.clearInterval(intervalId);
   }, [token, currentLocation?.id]);
 
   function handleLogout() {
@@ -90,6 +116,8 @@ export function App() {
     setUser(null);
     setCharacter(null);
     setMessages([]);
+    setPresence([]);
+    setSceneUpdatedAt(null);
   }
 
   async function handleRegister() {
@@ -138,6 +166,8 @@ export function App() {
       setSelectedLocation(locationId);
       const refreshed = await apiRequest<Character | null>("/characters/me", "GET", undefined, token);
       setCharacter(refreshed);
+      await refreshSceneData(token, locationId, true);
+      setTab("scene");
     } catch (err) {
       setError(getErrorMessage(err));
     }
@@ -150,6 +180,9 @@ export function App() {
       await apiRequest(`/locations/${currentLocation.id}/leave`, "POST", {}, token);
       const refreshed = await apiRequest<Character | null>("/characters/me", "GET", undefined, token);
       setCharacter(refreshed);
+      setMessages([]);
+      setPresence([]);
+      setSceneUpdatedAt(null);
     } catch (err) {
       setError(getErrorMessage(err));
     }
@@ -161,8 +194,7 @@ export function App() {
     try {
       await apiRequest(`/locations/${currentLocation.id}/say`, "POST", { content: speech }, token);
       setSpeech("");
-      const updated = await apiRequest<Message[]>(`/locations/${currentLocation.id}/messages`, "GET", undefined, token);
-      setMessages(updated);
+      await refreshSceneData(token, currentLocation.id, false);
     } catch (err) {
       setError(getErrorMessage(err));
     }
@@ -173,8 +205,7 @@ export function App() {
     setError("");
     try {
       await apiRequest(`/locations/${currentLocation.id}/action`, "POST", { action }, token);
-      const updated = await apiRequest<Message[]>(`/locations/${currentLocation.id}/messages`, "GET", undefined, token);
-      setMessages(updated);
+      await refreshSceneData(token, currentLocation.id, false);
     } catch (err) {
       setError(getErrorMessage(err));
     }
@@ -267,7 +298,16 @@ export function App() {
               onLeaveLocation={leaveLocation}
             />
           )}
-          {tab === "scene" && <SceneScreen messages={messages} speech={speech} onSpeechChange={setSpeech} onSendSpeech={sendSpeech} />}
+          {tab === "scene" && (
+            <SceneScreen
+              messages={messages}
+              presence={presence}
+              speech={speech}
+              lastUpdatedAt={sceneUpdatedAt}
+              onSpeechChange={setSpeech}
+              onSendSpeech={sendSpeech}
+            />
+          )}
           {tab === "actions" && <ActionsScreen actions={BASIC_SCENE_ACTIONS} onAction={doAction} />}
           {tab === "character" && (
             <CharacterScreen

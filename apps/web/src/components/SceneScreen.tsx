@@ -1,8 +1,12 @@
+import { PresencePanel, type PresenceCharacter } from "./PresencePanel";
+
 type Message = { id: string; messageType: string; content: string; character?: { name: string } | null; createdAt: string };
 
 type SceneScreenProps = {
   messages: Message[];
+  presence: PresenceCharacter[];
   speech: string;
+  lastUpdatedAt: Date | null;
   onSpeechChange: (value: string) => void;
   onSendSpeech: () => void;
 };
@@ -14,10 +18,24 @@ function messageClass(messageType: string) {
   return "msg-speech";
 }
 
-export function SceneScreen({ messages, speech, onSpeechChange, onSendSpeech }: SceneScreenProps) {
+export function SceneScreen({ messages, presence, speech, lastUpdatedAt, onSpeechChange, onSendSpeech }: SceneScreenProps) {
   return (
     <section className="card">
       <h3>Cena local</h3>
+      <div className="scene-live-indicator" role="status" aria-live="polite">
+        <span className="scene-live-dot" aria-hidden>
+          ●
+        </span>
+        <span>Cena atualizando automaticamente</span>
+        <small>
+          {lastUpdatedAt
+            ? `Atualizado às ${lastUpdatedAt.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}`
+            : "Aguardando primeira atualização"}
+        </small>
+      </div>
+
+      <PresencePanel presence={presence} />
+
       {messages.length === 0 ? (
         <div className="empty-state">
           <p>Nenhuma mensagem ainda.</p>
