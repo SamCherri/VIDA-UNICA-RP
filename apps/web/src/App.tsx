@@ -1,6 +1,13 @@
 import { useEffect, useMemo, useState } from "react";
 import { BASIC_SCENE_ACTIONS } from "@vida-unica/shared";
 import { apiRequest } from "./api/client";
+import { ErrorBanner } from "./components/ErrorBanner";
+import { AuthScreen } from "./components/AuthScreen";
+import { CityScreen } from "./components/CityScreen";
+import { SceneScreen } from "./components/SceneScreen";
+import { ActionsScreen } from "./components/ActionsScreen";
+import { CharacterScreen } from "./components/CharacterScreen";
+import { BottomNav } from "./components/BottomNav";
 
 type User = { id: string; username: string; role: string; email: string };
 type Character = {
@@ -117,11 +124,18 @@ export function App() {
     }
   }
 
-  async function enterLocation() {
-    if (!token || !selectedLocation) return;
+  async function enterLocation(locationId = selectedLocation) {
+    if (!token || !locationId) return;
+
+    if (locationId === currentLocation?.id) {
+      setError("Você já está neste local. Escolha outro ponto da cidade para movimentar a cena.");
+      return;
+    }
+
     setError("");
     try {
-      await apiRequest(`/locations/${selectedLocation}/enter`, "POST", {}, token);
+      await apiRequest(`/locations/${locationId}/enter`, "POST", {}, token);
+      setSelectedLocation(locationId);
       const refreshed = await apiRequest<Character | null>("/characters/me", "GET", undefined, token);
       setCharacter(refreshed);
     } catch (err) {
@@ -184,133 +198,103 @@ export function App() {
 
   if (!token) {
     return (
-      <main className="mobile-container">
-        <section className="card auth-card">
-          <h1>VIDA ÚNICA RP</h1>
-          <p>RP mobile-first por cenas visuais e ações contextuais.</p>
-          {showRegister ? (
-            <>
-              <input placeholder="Usuário" onChange={(e) => setRegisterForm({ ...registerForm, username: e.target.value })} />
-              <input placeholder="E-mail" onChange={(e) => setRegisterForm({ ...registerForm, email: e.target.value })} />
-              <input placeholder="Senha" type="password" onChange={(e) => setRegisterForm({ ...registerForm, password: e.target.value })} />
-              <button onClick={handleRegister}>Criar conta</button>
-              <button className="ghost" onClick={() => setShowRegister(false)}>Voltar</button>
-            </>
-          ) : (
-            <>
-              <input placeholder="Usuário ou e-mail" onChange={(e) => setLoginForm({ ...loginForm, login: e.target.value })} />
-              <input placeholder="Senha" type="password" onChange={(e) => setLoginForm({ ...loginForm, password: e.target.value })} />
-              <button onClick={handleLogin}>Entrar</button>
-              <button className="ghost" onClick={() => setShowRegister(true)}>Criar conta</button>
-            </>
-          )}
-          {error && <small className="error">{error}</small>}
-        </section>
-      </main>
+      <>
+        <AuthScreen
+          showRegister={showRegister}
+          loginForm={loginForm}
+          registerForm={registerForm}
+          onLoginFormChange={setLoginForm}
+          onRegisterFormChange={setRegisterForm}
+          onLogin={handleLogin}
+          onRegister={handleRegister}
+          onToggleMode={setShowRegister}
+        />
+        {error && (
+          <main className="mobile-container">
+            <ErrorBanner message={error} />
+          </main>
+        )}
+      </>
     );
   }
 
   return (
     <main className="mobile-container">
-      <header className="card">
-        <h2>Olá, {user?.username}</h2>
-        <p>Role: {user?.role}</p>
+      <header className="card app-header">
+        <div>
+          <h2>VIDA ÚNICA RP</h2>
+          <p>Operador: {user?.username}</p>
+        </div>
+        <span className="role-pill">{user?.role}</span>
       </header>
 
       {!character ? (
         <section className="card">
           <h3>Criar personagem</h3>
-          <input placeholder="Nome" onChange={(e) => setCharForm({ ...charForm, name: e.target.value })} />
-          <input type="number" placeholder="Idade" onChange={(e) => setCharForm({ ...charForm, age: Number(e.target.value) })} />
-          <input placeholder="Profissão" onChange={(e) => setCharForm({ ...charForm, profession: e.target.value })} />
-          <textarea placeholder="História" onChange={(e) => setCharForm({ ...charForm, story: e.target.value })} />
+          <p className="section-subtitle">Defina sua identidade antes de entrar nas ruas.</p>
+          <input value={charForm.name} placeholder="Nome" onChange={(e) => setCharForm({ ...charForm, name: e.target.value })} />
+          <input
+            value={charForm.age}
+            type="number"
+            placeholder="Idade"
+            onChange={(e) => setCharForm({ ...charForm, age: Number(e.target.value) })}
+          />
+          <input
+            value={charForm.profession}
+            placeholder="Profissão"
+            onChange={(e) => setCharForm({ ...charForm, profession: e.target.value })}
+          />
+          <textarea value={charForm.story} placeholder="História" onChange={(e) => setCharForm({ ...charForm, story: e.target.value })} />
           <button onClick={createCharacter}>Criar personagem</button>
 
           <h4>Histórico de mortos</h4>
-          <ul>
+          <ul className="dead-list">
             {deadHistory.map((dead) => (
-              <li key={dead.id}>{dead.name}</li>
+              <li key={dead.id}>
+                <strong>{dead.name}</strong>
+              </li>
             ))}
           </ul>
         </section>
       ) : (
         <>
           {tab === "city" && (
-            <section className="card">
-              <h3>Cidade</h3>
-              <p>Local atual: {currentLocation?.name ?? "Nenhum"}</p>
-              <select value={selectedLocation} onChange={(e) => setSelectedLocation(e.target.value)}>
-                <option value="">Selecione um local</option>
-                {locations.map((location) => (
-                  <option key={location.id} value={location.id}>{location.name}</option>
-                ))}
-              </select>
-              <button onClick={enterLocation}>Entrar no local</button>
-              <button className="ghost" onClick={leaveLocation}>Sair do local</button>
-            </section>
+            <CityScreen
+              locations={locations}
+              currentLocationId={currentLocation?.id}
+              currentLocationName={currentLocation?.name}
+              onEnterLocation={enterLocation}
+              onLeaveLocation={leaveLocation}
+            />
           )}
-
-          {tab === "scene" && (
-            <section className="card">
-              <h3>Cena local</h3>
-              <div className="timeline">
-                {messages.map((message) => (
-                  <article key={message.id}>
-                    <strong>{message.character?.name ?? "Sistema"}</strong>
-                    <p>{message.content}</p>
-                  </article>
-                ))}
-              </div>
-              <textarea value={speech} placeholder="Digite a fala do personagem" onChange={(e) => setSpeech(e.target.value)} />
-              <button onClick={sendSpeech}>Conversar</button>
-            </section>
-          )}
-
-          {tab === "actions" && (
-            <section className="card">
-              <h3>Ações contextuais</h3>
-              <div className="actions-grid">
-                {BASIC_SCENE_ACTIONS.map((action) => (
-                  <button key={action} onClick={() => doAction(action)}>{action}</button>
-                ))}
-              </div>
-            </section>
-          )}
-
+          {tab === "scene" && <SceneScreen messages={messages} speech={speech} onSpeechChange={setSpeech} onSendSpeech={sendSpeech} />}
+          {tab === "actions" && <ActionsScreen actions={BASIC_SCENE_ACTIONS} onAction={doAction} />}
           {tab === "character" && (
-            <section className="card">
-              <h3>Personagem</h3>
-              <p>{character.name} ({character.age} anos)</p>
-              <p>Status: {character.lifeStatus === "alive" ? "Vivo" : "Morto"}</p>
-              <p>Dinheiro em mãos: R$ {character.moneyCash}</p>
-              <p>Risco atual: {currentLocation?.riskLevel ?? "LOW"}</p>
-              {import.meta.env.DEV && (
-                <button className="danger" onClick={markDead}>
-                  Marcar morte permanente (teste)
-                </button>
-              )}
-            </section>
+            <CharacterScreen
+              character={character}
+              currentLocationName={currentLocation?.name}
+              currentRiskLevel={currentLocation?.riskLevel}
+              deadHistory={deadHistory}
+              canMarkDead={import.meta.env.DEV}
+              onMarkDead={markDead}
+            />
           )}
 
           {tab === "menu" && (
             <section className="card">
               <h3>Menu</h3>
-              <button className="ghost" onClick={handleLogout}>Sair da conta</button>
+              <button className="ghost" onClick={handleLogout}>
+                Sair da conta
+              </button>
               {adminRoles.has(user?.role ?? "") && <AdminPanel token={token} />}
             </section>
           )}
         </>
       )}
 
-      {error && <section className="card error">{error}</section>}
+      {error && <ErrorBanner message={error} />}
 
-      <nav className="bottom-nav">
-        <button onClick={() => setTab("city")}>Cidade</button>
-        <button onClick={() => setTab("scene")}>Cena</button>
-        <button onClick={() => setTab("actions")}>Ações</button>
-        <button onClick={() => setTab("character")}>Personagem</button>
-        <button onClick={() => setTab("menu")}>Menu</button>
-      </nav>
+      <BottomNav activeTab={tab} onChange={setTab} />
     </main>
   );
 }
