@@ -60,12 +60,10 @@ npm install
 
 ## Variáveis de ambiente
 
-
 ## Status de branch antes do deploy
 
 - A branch de correções precisa ser **mesclada na `main`** antes de qualquer deploy no Railway.
 - O fluxo recomendado é: validar build + migrations nesta branch corrigida -> merge para `main` -> deploy.
-
 
 > Em produção (Railway), configure direto no painel do serviço.
 
