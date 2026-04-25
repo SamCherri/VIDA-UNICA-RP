@@ -17,7 +17,7 @@ export function PresencePanel({ presence, currentCharacterId }: PresencePanelPro
     <section className="presence-panel">
       <h4>Pessoas neste local</h4>
       {presence.length === 0 || isOnlyCurrentPlayer ? (
-        <p className="presence-empty">Você está sozinho por enquanto.</p>
+        <p className="presence-empty">Você está sozinho neste local.</p>
       ) : (
         <ul className="presence-list">
           {presence.map((character) => (

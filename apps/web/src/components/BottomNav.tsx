@@ -1,4 +1,4 @@
-type Tab = "city" | "scene" | "actions" | "character" | "menu";
+type Tab = "city" | "scene" | "character" | "menu";
 
 type BottomNavProps = {
   activeTab: Tab;
@@ -8,7 +8,6 @@ type BottomNavProps = {
 const tabs: Array<{ id: Tab; label: string; emoji: string }> = [
   { id: "city", label: "Cidade", emoji: "🏙" },
   { id: "scene", label: "Agora", emoji: "💬" },
-  { id: "actions", label: "Fazer", emoji: "⚡" },
   { id: "character", label: "Vida", emoji: "👤" },
   { id: "menu", label: "Menu", emoji: "☰" }
 ];

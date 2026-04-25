@@ -1,3 +1,4 @@
+import { useMemo, useRef } from "react";
 import type { AvailableSceneAction, RiskLevel } from "@vida-unica/shared";
 import { PresencePanel, type PresenceCharacter } from "./PresencePanel";
 
@@ -13,6 +14,7 @@ type SceneScreenProps = {
   speech: string;
   lastUpdatedAt: Date | null;
   currentCharacterId: string;
+  currentCharacterName: string;
   professionalActions: AvailableSceneAction[];
   onSpeechChange: (value: string) => void;
   onSendSpeech: () => void;
@@ -23,11 +25,12 @@ type SceneScreenProps = {
 };
 
 const locationSituation: Record<string, string> = {
+  Mercado: "Este é um local de rotina civil. Você pode observar o movimento, falar com pessoas ou procurar atendimento.",
   "Praça Central": "A praça é o ponto mais comum da cidade. Pessoas passam, conversam e observam o movimento.",
-  "Banco Central": "O banco concentra dinheiro, atendimento e segurança. Cada atitude aqui pode gerar registro.",
-  Hospital: "O hospital recebe casos simples e emergências. Atendimento rápido pode mudar o rumo de uma vida.",
-  Delegacia: "A delegacia concentra ocorrências, registros e decisões policiais.",
-  "Beco Industrial": "O beco é uma área de risco. Pouca gente passa por aqui sem motivo.",
+  "Banco Central": "Este local envolve dinheiro e atendimento. Ações bancárias só fazem sentido para funcionários do banco.",
+  Hospital: "Este local recebe atendimento e emergências. Funcionários do hospital têm ações específicas aqui.",
+  Delegacia: "Este local concentra registros e atividade policial. Policiais têm ações específicas aqui.",
+  "Beco Industrial": "Área de risco. Evite ações sem motivo: tudo pode deixar rastro.",
   Prefeitura: "A prefeitura organiza documentos, protocolos e decisões que afetam a cidade."
 };
 
@@ -52,6 +55,33 @@ function messageTypeMeta(messageType: string) {
   return { icon: "💬", title: "Fala", cssClass: "msg-speech" };
 }
 
+const blockedActionKeywords = ["sacar", "deposit", "arma", "assalt", "fug", "entrar", "render"];
+
+function isAllowedProfessionalAction(label: string) {
+  const text = label.toLowerCase();
+  return !blockedActionKeywords.some((keyword) => text.includes(keyword));
+}
+
+function groupConsecutiveMessages(messages: Message[]) {
+  const grouped: Array<{ message: Message; count: number }> = [];
+
+  for (const message of messages) {
+    const previous = grouped[grouped.length - 1];
+    if (
+      previous &&
+      previous.message.content === message.content &&
+      previous.message.messageType === message.messageType &&
+      previous.message.character?.name === message.character?.name
+    ) {
+      previous.count += 1;
+    } else {
+      grouped.push({ message, count: 1 });
+    }
+  }
+
+  return grouped;
+}
+
 export function SceneScreen({
   locationName,
   profession,
@@ -62,6 +92,7 @@ export function SceneScreen({
   speech,
   lastUpdatedAt,
   currentCharacterId,
+  currentCharacterName,
   professionalActions,
   onSpeechChange,
   onSendSpeech,
@@ -70,6 +101,10 @@ export function SceneScreen({
   onLeaveLocation,
   onGoToCity
 }: SceneScreenProps) {
+  const speechRef = useRef<HTMLTextAreaElement | null>(null);
+  const recentMessages = useMemo(() => messages.slice(0, 8), [messages]);
+  const groupedMessages = useMemo(() => groupConsecutiveMessages(recentMessages), [recentMessages]);
+
   if (!locationName || !riskLevel) {
     return (
       <section className="card now-screen">
@@ -83,8 +118,15 @@ export function SceneScreen({
     );
   }
 
-  const situation = locationSituation[locationName] ?? "Este local faz parte da rotina da cidade. Observe o ambiente antes de agir.";
-  const quickProfessionalActions = professionalActions.filter((action) => action.category !== "Comum").slice(0, 4);
+  const situation = locationSituation[locationName] ?? "Observe o ambiente e interaja apenas com ações coerentes ao local.";
+  const quickProfessionalActions = professionalActions
+    .filter((action) => action.category !== "Comum" && isAllowedProfessionalAction(action.label))
+    .slice(0, 4);
+
+  function handleFocusSpeech() {
+    speechRef.current?.focus();
+    speechRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+  }
 
   return (
     <section className="card now-screen">
@@ -114,38 +156,52 @@ export function SceneScreen({
       <section className="action-group now-quick-actions">
         <h4>O que fazer agora</h4>
         <div className="actions-grid">
-          <button onClick={() => onQuickAction("Conversar")}>Conversar</button>
+          <button onClick={handleFocusSpeech}>Falar</button>
           <button onClick={() => onQuickAction("Observar")}>Observar</button>
           <button onClick={() => onQuickAction("Solicitar atendimento")}>Pedir ajuda</button>
+          <button className="ghost" onClick={onLeaveLocation}>
+            Sair do local
+          </button>
           {quickProfessionalActions.map((action) => (
             <button key={action.id} className="ghost" onClick={() => onProfessionalAction(action.id)}>
               {action.label}
             </button>
           ))}
-          <button className="ghost" onClick={onLeaveLocation}>
-            Sair do local
-          </button>
         </div>
       </section>
 
-      <PresencePanel presence={presence} currentCharacterId={currentCharacterId} />
+      <section className="now-speech">
+        <h4>Falar no local</h4>
+        <textarea
+          ref={speechRef}
+          value={speech}
+          placeholder="Fale como seu personagem..."
+          onChange={(e) => onSpeechChange(e.target.value)}
+        />
+        <small className="speech-help">Quem está neste local poderá ver sua fala.</small>
+        <button onClick={onSendSpeech}>Enviar fala</button>
+      </section>
 
       <section className="now-events">
         <h4>Acontecimentos recentes</h4>
-        {messages.length === 0 ? (
+        {groupedMessages.length === 0 ? (
           <div className="empty-state">
-            <p>Nada aconteceu ainda. Comece observando o ambiente ou falando com alguém.</p>
+            <p>Nada aconteceu ainda. Observe o ambiente ou fale com alguém para movimentar este local.</p>
           </div>
         ) : (
           <div className="timeline" aria-label="Acontecimentos recentes">
-            {messages.map((message) => {
+            {groupedMessages.map(({ message, count }) => {
               const meta = messageTypeMeta(message.messageType);
+              const isPlayerEvent = message.character?.name === currentCharacterName && meta.cssClass !== "msg-system";
               return (
-                <article key={message.id} className={`timeline-item ${meta.cssClass}`}>
+                <article key={message.id} className={`timeline-item ${meta.cssClass} ${isPlayerEvent ? "timeline-item-player" : ""}`}>
                   <strong>
                     {meta.icon} {meta.title}
                   </strong>
-                  <p>{message.character?.name ? `${message.character.name}: ${message.content}` : message.content}</p>
+                  <p>
+                    {message.character?.name ? `${message.character.name}: ${message.content}` : message.content}
+                    {count > 1 ? ` x${count}` : ""}
+                  </p>
                   <small>{new Date(message.createdAt).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}</small>
                 </article>
               );
@@ -154,11 +210,7 @@ export function SceneScreen({
         )}
       </section>
 
-      <section>
-        <textarea value={speech} placeholder="Fale como seu personagem..." onChange={(e) => onSpeechChange(e.target.value)} />
-        <small className="speech-help">Quem está neste local poderá ver sua fala.</small>
-        <button onClick={onSendSpeech}>Enviar fala</button>
-      </section>
+      <PresencePanel presence={presence} currentCharacterId={currentCharacterId} />
     </section>
   );
 }
