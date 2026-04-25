@@ -8,6 +8,7 @@ import { SceneScreen } from "./components/SceneScreen";
 import { ActionsScreen } from "./components/ActionsScreen";
 import { CharacterScreen } from "./components/CharacterScreen";
 import { BottomNav } from "./components/BottomNav";
+import { InstallGamePrompt } from "./components/InstallGamePrompt";
 import type { PresenceCharacter } from "./components/PresencePanel";
 
 type User = { id: string; username: string; role: string; email: string };
@@ -311,6 +312,9 @@ export function App() {
           onRegister={handleRegister}
           onToggleMode={setShowRegister}
         />
+        <main className="mobile-container compact-install">
+          <InstallGamePrompt />
+        </main>
         {error && (
           <main className="mobile-container">
             <ErrorBanner message={error} />
@@ -325,15 +329,16 @@ export function App() {
       <header className="card app-header">
         <div>
           <h2>VIDA ÚNICA RP</h2>
-          <p>Operador: {user?.username}</p>
+          <p>Jogador: {user?.username}</p>
         </div>
         <span className="role-pill">{user?.role}</span>
       </header>
+      <InstallGamePrompt />
 
       {!character ? (
         <section className="card">
           <h3>Criar personagem</h3>
-          <p className="section-subtitle">Defina sua identidade antes de entrar nas ruas.</p>
+          <p className="section-subtitle">Crie sua vida na cidade antes de começar sua rotina.</p>
           <input value={charForm.name} placeholder="Nome" onChange={(e) => setCharForm({ ...charForm, name: e.target.value })} />
           <input
             value={charForm.age}

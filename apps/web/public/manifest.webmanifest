@@ -1,0 +1,26 @@
+{
+  "name": "Vida Única RP",
+  "short_name": "Vida Única",
+  "description": "Simulador de vida RP online com cidade viva, profissões, decisões e consequências.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "theme_color": "#090b12",
+  "background_color": "#090b12",
+  "categories": ["games", "simulation", "roleplaying"],
+  "lang": "pt-BR",
+  "icons": [
+    {
+      "src": "/icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    },
+    {
+      "src": "/icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
+    }
+  ]
+}

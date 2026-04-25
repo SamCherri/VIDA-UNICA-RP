@@ -22,6 +22,12 @@ body {
   padding: 14px 14px 95px;
 }
 
+.mobile-container.compact-install {
+  min-height: auto;
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
 .auth-shell {
   display: flex;
   flex-direction: column;
@@ -443,4 +449,41 @@ button.danger {
   margin: 0;
   color: #95a5be;
   font-size: 13px;
+}
+
+.install-prompt {
+  border-color: #30518a;
+  background: linear-gradient(180deg, #111f35, #111722);
+}
+
+.install-title {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: #8ec0ff;
+}
+
+.install-text {
+  margin: 6px 0 0;
+  color: #d1e4ff;
+  font-size: 13px;
+}
+
+.install-actions {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.install-cta {
+  margin-top: 0;
+}
+
+.install-dismiss {
+  margin-top: 0;
+  width: auto;
+  padding: 12px 14px;
 }

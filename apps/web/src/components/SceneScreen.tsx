@@ -21,12 +21,12 @@ function messageClass(messageType: string) {
 export function SceneScreen({ messages, presence, speech, lastUpdatedAt, onSpeechChange, onSendSpeech }: SceneScreenProps) {
   return (
     <section className="card">
-      <h3>Cena local</h3>
+      <h3>Agora no local</h3>
       <div className="scene-live-indicator" role="status" aria-live="polite">
         <span className="scene-live-dot" aria-hidden>
           ●
         </span>
-        <span>Cena atualizando automaticamente</span>
+        <span>Acontecimentos atualizando automaticamente</span>
         <small>
           {lastUpdatedAt
             ? `Atualizado às ${lastUpdatedAt.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}`
@@ -38,11 +38,11 @@ export function SceneScreen({ messages, presence, speech, lastUpdatedAt, onSpeec
 
       {messages.length === 0 ? (
         <div className="empty-state">
-          <p>Nenhuma mensagem ainda.</p>
-          <small>Entre em ação para movimentar a cena RP deste local.</small>
+          <p>Nenhum acontecimento ainda.</p>
+          <small>Faça uma ação para movimentar a vida RP neste local.</small>
         </div>
       ) : (
-        <div className="timeline">
+        <div className="timeline" aria-label="Acontecimentos">
           {messages.map((message) => (
             <article key={message.id} className={`timeline-item ${messageClass(message.messageType)}`}>
               <strong>{message.character?.name ?? "Sistema"}</strong>
@@ -52,7 +52,7 @@ export function SceneScreen({ messages, presence, speech, lastUpdatedAt, onSpeec
           ))}
         </div>
       )}
-      <textarea value={speech} placeholder="Digite a fala do personagem" onChange={(e) => onSpeechChange(e.target.value)} />
+      <textarea value={speech} placeholder="Digite a fala da sua vida na cidade" onChange={(e) => onSpeechChange(e.target.value)} />
       <button onClick={onSendSpeech}>Conversar</button>
     </section>
   );

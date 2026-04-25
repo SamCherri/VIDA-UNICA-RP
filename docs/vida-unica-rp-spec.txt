@@ -1,5 +1,42 @@
 PROJETO: VIDA ÚNICA RP
-TIPO: Roleplay textual hardcore, mobile-first, com botões clicáveis, cidade viva, jogadores como prioridade e NPC apenas como solução de fallback.
+TIPO: Simulador de vida RP online, mobile-first, instalável como jogo no celular, com cidade viva, profissões, rotina, decisões e consequências.
+====================================================================
+DIREÇÃO DE PRODUTO: SIMULADOR DE VIDA RP
+====================================================================
+
+- VIDA ÚNICA RP é um simulador de vida RP online.
+- O jogador vive uma rotina dentro de uma cidade.
+- O objetivo não é vencer por combate ou gráfico.
+- O objetivo é construir vida, trabalho, relações, reputação e consequências.
+- O diferencial sobre jogos 2D/3D é profundidade social, decisões, registros, rastros, instituições e cidade viva.
+- Profissões pequenas importam.
+- Jogadores movem a cidade.
+- NPCs apenas impedem o jogo de travar.
+
+====================================================================
+DIREÇÃO DE PRODUTO: JOGO MOBILE INSTALÁVEL
+====================================================================
+
+- O jogo deve poder ser instalado no celular como PWA.
+- O jogador deve sentir que abriu um jogo, não um site.
+- A interface deve ter tela cheia, ícone, splash/identidade visual, menu inferior, botões grandes e sensação de game mobile.
+- Futuramente pode virar APK, mas a primeira etapa é PWA.
+- O navegador é apenas meio de distribuição; a experiência deve parecer jogo.
+
+====================================================================
+LOOP PRINCIPAL DO SIMULADOR DE VIDA
+====================================================================
+
+1. Jogador entra no jogo.
+2. Vê o estado atual da sua vida.
+3. Escolhe ou mantém um local.
+4. Trabalha, conversa, observa ou interage.
+5. Ganha ou perde oportunidades.
+6. Constrói reputação, dinheiro, relações e histórico.
+7. Suas ações deixam rastros.
+8. Outros jogadores ou instituições podem reagir.
+9. A vida continua enquanto o personagem estiver vivo.
+10. Se morrer definitivamente, perde tudo e recomeça com outro personagem.
 
 ====================================================================
 1. VISÃO GERAL DO JOGO

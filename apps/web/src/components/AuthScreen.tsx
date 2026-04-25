@@ -25,9 +25,9 @@ export function AuthScreen({
   return (
     <main className="mobile-container auth-shell">
       <section className="auth-hero">
-        <p className="auth-kicker">RPG urbano • mobile-first</p>
+        <p className="auth-kicker">Simulador de vida RP • mobile-first</p>
         <h1>VIDA ÚNICA RP</h1>
-        <p className="auth-subtitle">Uma cidade viva. Decisões permanentes. Seu nome em cada cena.</p>
+        <p className="auth-subtitle">Uma cidade viva. Rotina, decisões e consequências para a sua vida.</p>
       </section>
 
       <section className="card auth-card">
@@ -69,7 +69,7 @@ export function AuthScreen({
               type="password"
               onChange={(e) => onLoginFormChange({ ...loginForm, password: e.target.value })}
             />
-            <button onClick={onLogin}>Entrar</button>
+            <button onClick={onLogin}>Entrar na cidade</button>
             <button className="ghost" onClick={() => onToggleMode(true)}>
               Criar conta
             </button>

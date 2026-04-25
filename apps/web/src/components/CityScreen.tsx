@@ -14,7 +14,7 @@ export function CityScreen({ locations, currentLocationId, currentLocationName, 
   return (
     <section className="card">
       <h3>Cidade</h3>
-      <p className="section-subtitle">Local atual: {currentLocationName ?? "Nenhum"}</p>
+      <p className="section-subtitle">Agora: {currentLocationName ?? "Nenhum local selecionado"}</p>
       <div className="locations-grid">
         {locations.map((location) => (
           <LocationCard
