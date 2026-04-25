@@ -1,0 +1,91 @@
+:root {
+  color-scheme: dark;
+  font-family: Inter, system-ui, sans-serif;
+  background: #0e1017;
+  color: #e4e8f0;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: radial-gradient(circle at top, #1a2331, #0e1017 45%);
+}
+
+.mobile-container {
+  max-width: 520px;
+  margin: 0 auto;
+  min-height: 100vh;
+  padding: 12px 12px 80px;
+}
+
+.card {
+  background: #171c26;
+  border: 1px solid #2a3342;
+  border-radius: 16px;
+  padding: 12px;
+  margin-bottom: 10px;
+}
+
+.auth-card { margin-top: 20vh; }
+
+input, textarea, select, button {
+  width: 100%;
+  margin-top: 8px;
+  border-radius: 12px;
+  border: 1px solid #3a465a;
+  background: #10151f;
+  color: #edf3ff;
+  padding: 10px;
+}
+
+button {
+  background: #3a77ff;
+  border: none;
+  font-weight: 600;
+}
+
+button.ghost { background: #2a3240; }
+button.danger { background: #a72d3f; }
+
+.actions-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.timeline article {
+  border-left: 2px solid #3a77ff;
+  padding-left: 10px;
+  margin-bottom: 8px;
+}
+
+.bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 6px;
+  background: #10151f;
+  border-top: 1px solid #2a3342;
+  padding: 8px;
+}
+
+.bottom-nav button {
+  margin: 0;
+  border-radius: 10px;
+  padding: 8px 4px;
+  font-size: 12px;
+}
+
+.admin-user {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  gap: 8px;
+  padding: 8px 0;
+  border-bottom: 1px solid #2a3342;
+}
+
+.error { color: #ff8291; }

@@ -1,0 +1,305 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  player
+  support
+  moderator
+  admin
+  master_admin
+}
+
+enum CharacterLifeStatus {
+  alive
+  dead
+}
+
+enum RiskLevel {
+  LOW
+  MEDIUM
+  HIGH
+  EXTREME
+}
+
+model User {
+  id                String             @id @default(cuid())
+  username          String             @unique
+  email             String             @unique
+  passwordHash      String
+  role              UserRole           @default(player)
+  isBanned          Boolean            @default(false)
+  banReason         String?
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+  lastLoginAt       DateTime?
+  characters        Character[]
+  adminLogs         AdminLog[]
+  staffReports      StaffReport[]
+  subscriptions     Subscription[]
+  npcFallbackEvents NpcFallbackEvent[]
+}
+
+model Character {
+  id                String              @id @default(cuid())
+  userId            String
+  name              String
+  age               Int
+  story             String?
+  appearance        String?
+  profession        String?
+  lifeStatus        CharacterLifeStatus @default(alive)
+  isFrozen          Boolean             @default(false)
+  currentLocationId String?
+  moneyCash         Int                 @default(0)
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+  deathAt           DateTime?
+  deathReason       String?
+  user              User                @relation(fields: [userId], references: [id])
+  currentLocation   Location?           @relation(fields: [currentLocationId], references: [id])
+  locationMessages  LocationMessage[]
+  actionLogs        ActionLog[]
+  bankAccount       BankAccount?
+  inventoryItems    InventoryItem[]
+  policeReports     PoliceReport[]
+  medicalRecords    MedicalRecord[]
+  deathRecord       DeathRecord?
+  skills            CharacterSkill[]
+  skillLogs         SkillLog[]
+  reputation        CharacterReputation?
+  reputationLogs    ReputationLog[]
+  properties        Property[]
+  propertyKeys      PropertyKey[]
+  vehicles          Vehicle[]
+  vehicleKeys       VehicleKey[]
+
+  @@index([userId, lifeStatus], map: "characters_user_life_idx")
+}
+
+model Location {
+  id                String            @id @default(cuid())
+  name              String            @unique
+  description       String
+  riskLevel         RiskLevel         @default(LOW)
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+  currentCharacters Character[]
+  messages          LocationMessage[]
+  actionLogs        ActionLog[]
+}
+
+model LocationMessage {
+  id          String     @id @default(cuid())
+  locationId  String
+  characterId String?
+  messageType String
+  content     String
+  createdAt   DateTime   @default(now())
+  location    Location   @relation(fields: [locationId], references: [id])
+  character   Character? @relation(fields: [characterId], references: [id])
+}
+
+model ActionLog {
+  id          String     @id @default(cuid())
+  userId      String
+  characterId String?
+  locationId  String?
+  actionType  String
+  description String
+  metadata    Json?
+  createdAt   DateTime   @default(now())
+  character   Character? @relation(fields: [characterId], references: [id])
+  location    Location?  @relation(fields: [locationId], references: [id])
+}
+
+model BankAccount {
+  id          String    @id @default(cuid())
+  characterId String    @unique
+  balance     Int       @default(0)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  character   Character @relation(fields: [characterId], references: [id])
+}
+
+model AdminLog {
+  id          String   @id @default(cuid())
+  actorUserId String
+  targetType  String
+  targetId    String
+  actionType  String
+  reason      String?
+  createdAt   DateTime @default(now())
+  actor       User     @relation(fields: [actorUserId], references: [id])
+}
+
+model ActionCatalog {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  label     String
+  createdAt DateTime @default(now())
+}
+
+model Job {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  createdAt   DateTime @default(now())
+}
+
+model Company {
+  id        String   @id @default(cuid())
+  name      String
+  createdAt DateTime @default(now())
+}
+
+model InventoryItem {
+  id          String    @id @default(cuid())
+  characterId String
+  name        String
+  quantity    Int       @default(1)
+  createdAt   DateTime  @default(now())
+  character   Character @relation(fields: [characterId], references: [id])
+}
+
+model PoliceReport {
+  id          String     @id @default(cuid())
+  characterId String?
+  title       String
+  details     String
+  createdAt   DateTime   @default(now())
+  character   Character? @relation(fields: [characterId], references: [id])
+}
+
+model MedicalRecord {
+  id          String    @id @default(cuid())
+  characterId String
+  notes       String
+  createdAt   DateTime  @default(now())
+  character   Character @relation(fields: [characterId], references: [id])
+}
+
+model GovernmentProtocol {
+  id        String   @id @default(cuid())
+  code      String   @unique
+  status    String
+  createdAt DateTime @default(now())
+}
+
+model DeathRecord {
+  id          String    @id @default(cuid())
+  characterId String    @unique
+  reason      String
+  createdAt   DateTime  @default(now())
+  character   Character @relation(fields: [characterId], references: [id])
+}
+
+model NpcFallbackEvent {
+  id                String   @id @default(cuid())
+  locationId        String?
+  category          String
+  details           String
+  requestedByUserId String
+  requestedByRole   UserRole
+  status            String   @default("requested")
+  createdAt         DateTime @default(now())
+  requester         User     @relation(fields: [requestedByUserId], references: [id])
+
+  @@index([status], map: "npc_fallback_status_idx")
+}
+
+model StaffReport {
+  id        String   @id @default(cuid())
+  userId    String
+  summary   String
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id])
+}
+
+model CharacterSkill {
+  id          String    @id @default(cuid())
+  characterId String
+  skill       String
+  level       Int       @default(1)
+  createdAt   DateTime  @default(now())
+  character   Character @relation(fields: [characterId], references: [id])
+}
+
+model SkillLog {
+  id          String    @id @default(cuid())
+  characterId String
+  skill       String
+  change      Int
+  reason      String
+  createdAt   DateTime  @default(now())
+  character   Character @relation(fields: [characterId], references: [id])
+}
+
+model CharacterReputation {
+  id          String    @id @default(cuid())
+  characterId String    @unique
+  score       Int       @default(0)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  character   Character @relation(fields: [characterId], references: [id])
+}
+
+model ReputationLog {
+  id          String    @id @default(cuid())
+  characterId String
+  change      Int
+  reason      String
+  createdAt   DateTime  @default(now())
+  character   Character @relation(fields: [characterId], references: [id])
+}
+
+model Subscription {
+  id        String   @id @default(cuid())
+  userId    String
+  type      String
+  active    Boolean  @default(false)
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id])
+}
+
+model Property {
+  id          String     @id @default(cuid())
+  characterId String?
+  address     String
+  createdAt   DateTime   @default(now())
+  owner       Character? @relation(fields: [characterId], references: [id])
+  keys        PropertyKey[]
+}
+
+model PropertyKey {
+  id          String    @id @default(cuid())
+  propertyId  String
+  characterId String
+  createdAt   DateTime  @default(now())
+  property    Property  @relation(fields: [propertyId], references: [id])
+  character   Character @relation(fields: [characterId], references: [id])
+}
+
+model Vehicle {
+  id          String     @id @default(cuid())
+  characterId String?
+  model       String
+  plate       String     @unique
+  createdAt   DateTime   @default(now())
+  owner       Character? @relation(fields: [characterId], references: [id])
+  keys        VehicleKey[]
+}
+
+model VehicleKey {
+  id          String    @id @default(cuid())
+  vehicleId   String
+  characterId String
+  createdAt   DateTime  @default(now())
+  vehicle     Vehicle   @relation(fields: [vehicleId], references: [id])
+  character   Character @relation(fields: [characterId], references: [id])
+}
