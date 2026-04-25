@@ -37,35 +37,36 @@ export function CharacterScreen({
   canMarkDead,
   onMarkDead
 }: CharacterScreenProps) {
+  const infoCards = [
+    { label: "Nome", value: character.name },
+    { label: "Idade", value: `${character.age} anos` },
+    { label: "Profissão", value: character.profession ?? "Desempregado" },
+    { label: "Dinheiro", value: `R$ ${character.moneyCash}` },
+    { label: "Local atual", value: currentLocationName ?? "Nenhum" },
+    { label: "Risco atual", value: currentRiskLevel ?? "LOW", isRisk: true },
+    { label: "Status de vida", value: character.lifeStatus === "alive" ? "Vivo" : "Morto", isStatus: true },
+    { label: "Vidas encerradas", value: String(deadHistory.length) }
+  ];
+
   return (
     <section className="card">
       <h3>Minha vida</h3>
-      <article className="character-sheet">
-        <p>
-          <strong>Nome:</strong> {character.name}
-        </p>
-        <p>
-          <strong>Idade:</strong> {character.age} anos
-        </p>
-        <p>
-          <strong>Status:</strong>{" "}
-          <StatusBadge variant={character.lifeStatus === "alive" ? "success" : "danger"}>
-            {character.lifeStatus === "alive" ? "Vivo" : "Morto"}
-          </StatusBadge>
-        </p>
-        <p>
-          <strong>Dinheiro:</strong> R$ {character.moneyCash}
-        </p>
-        <p>
-          <strong>Profissão:</strong> {character.profession ?? "Desempregado"}
-        </p>
-        <p>
-          <strong>Local atual:</strong> {currentLocationName ?? "Nenhum"}
-        </p>
-        <p>
-          <strong>Risco atual:</strong> <StatusBadge riskLevel={currentRiskLevel ?? "LOW"}>{currentRiskLevel ?? "LOW"}</StatusBadge>
-        </p>
-      </article>
+      <p className="section-subtitle">Seu personagem tem uma única vida. Construa rotina, relações e consequências.</p>
+
+      <div className="life-cards-grid">
+        {infoCards.map((item) => (
+          <article key={item.label} className="life-info-card">
+            <small>{item.label}</small>
+            {item.isStatus ? (
+              <StatusBadge variant={character.lifeStatus === "alive" ? "success" : "danger"}>{item.value}</StatusBadge>
+            ) : item.isRisk ? (
+              <StatusBadge riskLevel={currentRiskLevel ?? "LOW"}>{item.value}</StatusBadge>
+            ) : (
+              <strong>{item.value}</strong>
+            )}
+          </article>
+        ))}
+      </div>
 
       <h4>Vidas encerradas</h4>
       {deadHistory.length === 0 ? (
