@@ -1,6 +1,14 @@
 import { useEffect, useMemo, useState } from "react";
 import { PROFESSIONS, type AvailableSceneAction, type Profession } from "@vida-unica/shared";
-import { apiRequest } from "./api/client";
+import {
+  apiRequest,
+  getRoutineMe,
+  postRoutineDrink,
+  postRoutineEat,
+  postRoutineRest,
+  postRoutineWork,
+  type RoutinePayload
+} from "./api/client";
 import { ErrorBanner } from "./components/ErrorBanner";
 import { AuthScreen } from "./components/AuthScreen";
 import { CityScreen } from "./components/CityScreen";
@@ -18,6 +26,13 @@ type Character = {
   lifeStatus: "alive" | "dead";
   profession?: Profession;
   moneyCash: number;
+  hunger: number;
+  thirst: number;
+  sleep: number;
+  energy: number;
+  routineUpdatedAt: string;
+  lastWorkAt: string | null;
+  workStreak: number;
   currentLocation?: { id: string; name: string; riskLevel: "LOW" | "MEDIUM" | "HIGH" | "EXTREME" } | null;
   currentLocationId?: string | null;
 };
@@ -37,6 +52,7 @@ export function App() {
   const [token, setToken] = useState<string | null>(() => localStorage.getItem("vu_token"));
   const [user, setUser] = useState<User | null>(null);
   const [character, setCharacter] = useState<Character | null>(null);
+  const [routine, setRoutine] = useState<RoutinePayload | null>(null);
   const [deadHistory, setDeadHistory] = useState<Character[]>([]);
   const [locations, setLocations] = useState<Location[]>([]);
   const [selectedLocation, setSelectedLocation] = useState<string>("");
@@ -91,6 +107,15 @@ export function App() {
     }
   }
 
+  async function refreshRoutineData(authToken: string) {
+    try {
+      const routineData = await getRoutineMe(authToken);
+      setRoutine(routineData);
+    } catch {
+      setRoutine(null);
+    }
+  }
+
   async function refreshAvailableActions(authToken: string, locationId: string) {
     try {
       const actions = await apiRequest<AvailableSceneAction[]>(`/locations/${locationId}/available-actions`, "GET", undefined, authToken);
@@ -112,6 +137,12 @@ export function App() {
     setSelectedProfession((activeCharacter?.profession as Profession | undefined) ?? DEFAULT_PROFESSION);
     setDeadHistory(history);
     setLocations(locationList);
+
+    if (activeCharacter) {
+      await refreshRoutineData(authToken);
+    } else {
+      setRoutine(null);
+    }
   }
 
   useEffect(() => {
@@ -151,6 +182,7 @@ export function App() {
     setToken(null);
     setUser(null);
     setCharacter(null);
+    setRoutine(null);
     setMessages([]);
     setPresence([]);
     setAvailableActions([]);
@@ -185,6 +217,7 @@ export function App() {
       const created = await apiRequest<Character>("/characters", "POST", charForm, token);
       setCharacter(created);
       setSelectedProfession((created.profession as Profession | undefined) ?? DEFAULT_PROFESSION);
+      await refreshRoutineData(token);
     } catch (err) {
       setError(getErrorMessage(err));
     }
@@ -204,6 +237,7 @@ export function App() {
       setSelectedLocation(locationId);
       const refreshed = await apiRequest<Character | null>("/characters/me", "GET", undefined, token);
       setCharacter(refreshed);
+      await refreshRoutineData(token);
       await refreshSceneData(token, locationId, true);
       setTab("scene");
     } catch (err) {
@@ -218,6 +252,7 @@ export function App() {
       await apiRequest(`/locations/${currentLocation.id}/leave`, "POST", {}, token);
       const refreshed = await apiRequest<Character | null>("/characters/me", "GET", undefined, token);
       setCharacter(refreshed);
+      await refreshRoutineData(token);
       setMessages([]);
       setPresence([]);
       setAvailableActions([]);
@@ -233,6 +268,7 @@ export function App() {
     try {
       await apiRequest(`/locations/${currentLocation.id}/say`, "POST", { content: speech }, token);
       setSpeech("");
+      await refreshRoutineData(token);
       await refreshSceneData(token, currentLocation.id, false);
     } catch (err) {
       setError(getErrorMessage(err));
@@ -244,6 +280,7 @@ export function App() {
     setError("");
     try {
       await apiRequest(`/locations/${currentLocation.id}/action`, "POST", { action }, token);
+      await refreshRoutineData(token);
       await refreshSceneData(token, currentLocation.id, false);
     } catch (err) {
       setError(getErrorMessage(err));
@@ -255,8 +292,33 @@ export function App() {
     setError("");
     try {
       await apiRequest(`/locations/${currentLocation.id}/professional-action`, "POST", { actionId }, token);
+      await refreshRoutineData(token);
       await refreshSceneData(token, currentLocation.id, false);
       await refreshAvailableActions(token, currentLocation.id);
+    } catch (err) {
+      setError(getErrorMessage(err));
+    }
+  }
+
+  async function runRoutineAction(action: "eat" | "drink" | "rest" | "work") {
+    if (!token) return;
+
+    setError("");
+
+    try {
+      let routineResult: RoutinePayload;
+      if (action === "eat") routineResult = await postRoutineEat(token);
+      else if (action === "drink") routineResult = await postRoutineDrink(token);
+      else if (action === "rest") routineResult = await postRoutineRest(token);
+      else routineResult = await postRoutineWork(token);
+
+      setRoutine(routineResult);
+      const refreshed = await apiRequest<Character | null>("/characters/me", "GET", undefined, token);
+      setCharacter(refreshed);
+
+      if (currentLocation?.id) {
+        await refreshSceneData(token, currentLocation.id, false);
+      }
     } catch (err) {
       setError(getErrorMessage(err));
     }
@@ -270,6 +332,7 @@ export function App() {
       const updated = await apiRequest<Character>("/characters/me/profession", "POST", { profession: selectedProfession }, token);
       setCharacter(updated);
       setSelectedProfession((updated.profession as Profession | undefined) ?? DEFAULT_PROFESSION);
+      await refreshRoutineData(token);
       if (updated.currentLocationId) {
         await refreshAvailableActions(token, updated.currentLocationId);
       } else {
@@ -293,6 +356,7 @@ export function App() {
       ]);
       setCharacter(activeCharacter);
       setDeadHistory(history);
+      setRoutine(null);
     } catch (err) {
       setError(getErrorMessage(err));
     }
@@ -381,6 +445,8 @@ export function App() {
               profession={character.profession ?? DEFAULT_PROFESSION}
               moneyCash={character.moneyCash}
               riskLevel={currentLocation?.riskLevel}
+              routine={routine}
+              isInLocation={Boolean(currentLocation?.id)}
               messages={messages}
               presence={presence}
               speech={speech}
@@ -392,6 +458,7 @@ export function App() {
               onSendSpeech={sendSpeech}
               onQuickAction={doAction}
               onProfessionalAction={doProfessionalAction}
+              onRoutineAction={runRoutineAction}
               onLeaveLocation={leaveLocation}
               onGoToCity={() => setTab("city")}
             />
@@ -399,6 +466,7 @@ export function App() {
           {tab === "character" && (
             <CharacterScreen
               character={character}
+              routine={routine}
               professions={PROFESSIONS}
               selectedProfession={selectedProfession}
               onProfessionChange={setSelectedProfession}

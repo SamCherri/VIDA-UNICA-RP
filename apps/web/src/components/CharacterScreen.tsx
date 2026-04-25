@@ -1,4 +1,5 @@
 import type { Profession } from "@vida-unica/shared";
+import type { RoutinePayload } from "../api/client";
 import { StatusBadge } from "./StatusBadge";
 
 type Character = {
@@ -12,6 +13,7 @@ type Character = {
 
 type CharacterScreenProps = {
   character: Character;
+  routine: RoutinePayload | null;
   professions: readonly Profession[];
   selectedProfession: Profession;
   onProfessionChange: (profession: Profession) => void;
@@ -26,6 +28,7 @@ type CharacterScreenProps = {
 
 export function CharacterScreen({
   character,
+  routine,
   professions,
   selectedProfession,
   onProfessionChange,
@@ -67,6 +70,41 @@ export function CharacterScreen({
           </article>
         ))}
       </div>
+
+      <h4>Condição atual</h4>
+      {!routine ? (
+        <p className="section-subtitle">Sem dados de rotina no momento.</p>
+      ) : (
+        <div className="life-cards-grid">
+          <article className="life-info-card">
+            <small>Fome</small>
+            <strong>{routine.hunger}%</strong>
+          </article>
+          <article className="life-info-card">
+            <small>Sede</small>
+            <strong>{routine.thirst}%</strong>
+          </article>
+          <article className="life-info-card">
+            <small>Sono</small>
+            <strong>{routine.sleep}%</strong>
+          </article>
+          <article className="life-info-card">
+            <small>Energia</small>
+            <strong>{routine.energy}%</strong>
+          </article>
+          <article className="life-info-card">
+            <small>Sequência de trabalho</small>
+            <strong>{routine.workStreak}</strong>
+          </article>
+          <article className="life-info-card">
+            <small>Último trabalho</small>
+            <strong>{routine.lastWorkAt ? new Date(routine.lastWorkAt).toLocaleString("pt-BR") : "Nunca"}</strong>
+          </article>
+        </div>
+      )}
+      <p className="section-subtitle">
+        Cuide da rotina do personagem. Trabalhar sem comer, beber ou descansar reduz sua capacidade de continuar.
+      </p>
 
       <h4>Vidas encerradas</h4>
       {deadHistory.length === 0 ? (

@@ -6,6 +6,7 @@ import { prisma } from "../lib/prisma.js";
 import { requireAuth } from "../middleware/auth.js";
 import { logAction } from "../services/log.service.js";
 import { assertCooldown } from "../lib/cooldown.js";
+import { applyRoutineDecay } from "../services/routine.service.js";
 
 const SAY_COOLDOWN_MS = 2500;
 const ACTION_COOLDOWN_MS = 2000;
@@ -281,11 +282,18 @@ export async function locationRoutes(app: FastifyInstance) {
 
   app.post("/locations/:id/enter", { preHandler: [requireAuth] }, async (request, reply) => {
     const { id } = z.object({ id: z.string().cuid() }).parse(request.params);
-    const character = await getAliveCharacter(request.authUser.id);
+    let character = await getAliveCharacter(request.authUser.id);
 
     if (!character) {
       return reply.code(404).send({ message: "Personagem vivo não encontrado." });
     }
+
+    character = await applyRoutineDecay(character, (characterId, data) =>
+      prisma.character.update({
+        where: { id: characterId },
+        data
+      })
+    );
 
     const location = await prisma.location.findUnique({ where: { id } });
     if (!location) {
@@ -319,11 +327,17 @@ export async function locationRoutes(app: FastifyInstance) {
 
   app.post("/locations/:id/leave", { preHandler: [requireAuth] }, async (request, reply) => {
     const { id } = z.object({ id: z.string().cuid() }).parse(request.params);
-    const character = await getAliveCharacter(request.authUser.id);
+    let character = await getAliveCharacter(request.authUser.id);
 
     if (!character || character.currentLocationId !== id) {
       return reply.code(400).send({ message: "Você não está nesse local." });
     }
+    character = await applyRoutineDecay(character, (characterId, data) =>
+      prisma.character.update({
+        where: { id: characterId },
+        data
+      })
+    );
 
     await prisma.locationMessage.create({
       data: {
@@ -382,10 +396,17 @@ export async function locationRoutes(app: FastifyInstance) {
   app.get("/locations/:id/available-actions", { preHandler: [requireAuth] }, async (request, reply) => {
     const { id } = z.object({ id: z.string().cuid() }).parse(request.params);
 
-    const character = await getAliveCharacter(request.authUser.id);
+    let character = await getAliveCharacter(request.authUser.id);
     if (!character) {
       return reply.code(400).send({ message: "Personagem vivo não encontrado." });
     }
+
+    character = await applyRoutineDecay(character, (characterId, data) =>
+      prisma.character.update({
+        where: { id: characterId },
+        data
+      })
+    );
 
     if (character.lifeStatus !== CharacterLifeStatus.alive) {
       return reply.code(400).send({ message: "Personagem morto não pode executar ações." });
@@ -421,11 +442,17 @@ export async function locationRoutes(app: FastifyInstance) {
         .send({ message: "Você está falando rápido demais. Aguarde alguns segundos." });
     }
 
-    const character = await getAliveCharacter(request.authUser.id);
+    let character = await getAliveCharacter(request.authUser.id);
 
     if (!character || character.currentLocationId !== id) {
       return reply.code(400).send({ message: "Seu personagem precisa estar no local para falar." });
     }
+    character = await applyRoutineDecay(character, (characterId, data) =>
+      prisma.character.update({
+        where: { id: characterId },
+        data
+      })
+    );
 
     const message = await prisma.locationMessage.create({
       data: {
@@ -459,11 +486,17 @@ export async function locationRoutes(app: FastifyInstance) {
         .send({ message: "Ação executada rápido demais. Aguarde para tentar novamente." });
     }
 
-    const character = await getAliveCharacter(request.authUser.id);
+    let character = await getAliveCharacter(request.authUser.id);
 
     if (!character || character.currentLocationId !== id) {
       return reply.code(400).send({ message: "Seu personagem precisa estar no local para agir." });
     }
+    character = await applyRoutineDecay(character, (characterId, data) =>
+      prisma.character.update({
+        where: { id: characterId },
+        data
+      })
+    );
 
     const systemText = `${character.name} executou a ação: ${body.action}.`;
     const message = await prisma.locationMessage.create({
@@ -490,7 +523,7 @@ export async function locationRoutes(app: FastifyInstance) {
     const { id } = z.object({ id: z.string().cuid() }).parse(request.params);
     const body = professionalActionSchema.parse(request.body);
 
-    const character = await getAliveCharacter(request.authUser.id);
+    let character = await getAliveCharacter(request.authUser.id);
     if (!character) {
       return reply.code(400).send({ message: "Personagem vivo não encontrado." });
     }
@@ -498,6 +531,13 @@ export async function locationRoutes(app: FastifyInstance) {
     if (character.currentLocationId !== id) {
       return reply.code(400).send({ message: "Seu personagem precisa estar neste local." });
     }
+
+    character = await applyRoutineDecay(character, (characterId, data) =>
+      prisma.character.update({
+        where: { id: characterId },
+        data
+      })
+    );
 
     const location = await prisma.location.findUnique({ where: { id } });
     if (!location) {

@@ -257,6 +257,22 @@ Nela o jogador visualiza rapidamente:
 
 A aba **Fazer** continua como lista completa de ações, enquanto a aba **Agora** prioriza decisões rápidas do momento.
 
+
+## Sistema de rotina e necessidades
+
+O jogo agora possui uma base real de rotina do personagem:
+
+- **fome**, **sede**, **sono** e **energia** (0 a 100);
+- **decaimento por tempo real** usando *lazy update* (sem cron externo);
+- ações manuais: **Comer**, **Beber água**, **Descansar** e **Trabalhar**;
+- trabalho com salário básico por profissão (Atendente do Hospital, Caixa de Banco, Segurança e Policial);
+- bloqueio leve de trabalho quando a condição de vida está crítica;
+- logs e mensagens de rotina/trabalho dentro do local atual.
+
+Nesta fase:
+- ainda **não** existe morte por necessidades;
+- ainda **não** existe sistema avançado de empresas/salário automático.
+
 ## Próximas fases
 
 1. UX de simulador de vida e tela "Agora/Local".

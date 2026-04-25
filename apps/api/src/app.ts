@@ -9,6 +9,7 @@ import { characterRoutes } from "./routes/characters.routes.js";
 import { locationRoutes } from "./routes/locations.routes.js";
 import { adminRoutes } from "./routes/admin.routes.js";
 import { gameRoutes } from "./routes/game.routes.js";
+import { routineRoutes } from "./routes/routine.routes.js";
 
 export async function buildApp() {
   const app = Fastify({ logger: true });
@@ -44,6 +45,7 @@ export async function buildApp() {
   await app.register(locationRoutes);
   await app.register(adminRoutes);
   await app.register(gameRoutes);
+  await app.register(routineRoutes);
 
   return app;
 }

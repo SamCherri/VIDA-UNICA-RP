@@ -5,6 +5,7 @@ import { z } from "zod";
 import { prisma } from "../lib/prisma.js";
 import { requireAuth } from "../middleware/auth.js";
 import { logAction } from "../services/log.service.js";
+import { applyRoutineDecay } from "../services/routine.service.js";
 
 const professionSchema = z.enum(PROFESSIONS);
 const DEFAULT_PROFESSION = "Desempregado";
@@ -52,6 +53,10 @@ export async function characterRoutes(app: FastifyInstance) {
               profession: safeProfession,
               currentLocationId: defaultLocation?.id,
               moneyCash: 500,
+              hunger: 80,
+              thirst: 80,
+              sleep: 80,
+              energy: 80,
               bankAccount: { create: { balance: 500 } }
             }
           });
@@ -82,8 +87,23 @@ export async function characterRoutes(app: FastifyInstance) {
   });
 
   app.get("/characters/me", { preHandler: [requireAuth] }, async (request) => {
+    const character = await prisma.character.findFirst({
+      where: { userId: request.authUser.id, lifeStatus: CharacterLifeStatus.alive }
+    });
+
+    if (!character) {
+      return null;
+    }
+
+    await applyRoutineDecay(character, (id, data) =>
+      prisma.character.update({
+        where: { id },
+        data
+      })
+    );
+
     return prisma.character.findFirst({
-      where: { userId: request.authUser.id, lifeStatus: CharacterLifeStatus.alive },
+      where: { id: character.id },
       include: { bankAccount: true, currentLocation: true }
     });
   });
