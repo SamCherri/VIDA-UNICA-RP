@@ -116,12 +116,14 @@ export async function locationRoutes(app: FastifyInstance) {
   app.get("/locations/:id/messages", { preHandler: [requireAuth] }, async (request) => {
     const { id } = z.object({ id: z.string().cuid() }).parse(request.params);
 
-    return prisma.locationMessage.findMany({
+    const recentMessages = await prisma.locationMessage.findMany({
       where: { locationId: id },
       include: { character: { select: { name: true } } },
-      orderBy: { createdAt: "asc" },
+      orderBy: { createdAt: "desc" },
       take: 100
     });
+
+    return recentMessages.reverse();
   });
 
   app.post("/locations/:id/say", { preHandler: [requireAuth] }, async (request, reply) => {

@@ -18,6 +18,11 @@ type Message = { id: string; messageType: string; content: string; character?: {
 
 const adminRoles = new Set(["support", "moderator", "admin", "master_admin"]);
 
+function getErrorMessage(err: unknown) {
+  if (err instanceof Error) return err.message;
+  return "Ocorreu um erro inesperado.";
+}
+
 export function App() {
   const [token, setToken] = useState<string | null>(() => localStorage.getItem("vu_token"));
   const [user, setUser] = useState<User | null>(null);
@@ -56,7 +61,7 @@ export function App() {
   useEffect(() => {
     if (!token) return;
     bootstrap(token).catch((err) => {
-      setError(err.message);
+      setError(getErrorMessage(err));
       handleLogout();
     });
   }, [token]);
@@ -69,7 +74,7 @@ export function App() {
 
     apiRequest<Message[]>(`/locations/${currentLocation.id}/messages`, "GET", undefined, token)
       .then(setMessages)
-      .catch((err) => setError(err.message));
+      .catch((err) => setError(getErrorMessage(err)));
   }, [token, currentLocation?.id]);
 
   function handleLogout() {
@@ -82,61 +87,99 @@ export function App() {
 
   async function handleRegister() {
     setError("");
-    await apiRequest("/auth/register", "POST", registerForm);
-    setShowRegister(false);
+    try {
+      await apiRequest("/auth/register", "POST", registerForm);
+      setShowRegister(false);
+    } catch (err) {
+      setError(getErrorMessage(err));
+    }
   }
 
   async function handleLogin() {
     setError("");
-    const payload = await apiRequest<{ token: string }>("/auth/login", "POST", loginForm);
-    localStorage.setItem("vu_token", payload.token);
-    setToken(payload.token);
+    try {
+      const payload = await apiRequest<{ token: string }>("/auth/login", "POST", loginForm);
+      localStorage.setItem("vu_token", payload.token);
+      setToken(payload.token);
+    } catch (err) {
+      setError(getErrorMessage(err));
+    }
   }
 
   async function createCharacter() {
     if (!token) return;
-    const created = await apiRequest<Character>("/characters", "POST", charForm, token);
-    setCharacter(created);
+    setError("");
+    try {
+      const created = await apiRequest<Character>("/characters", "POST", charForm, token);
+      setCharacter(created);
+    } catch (err) {
+      setError(getErrorMessage(err));
+    }
   }
 
   async function enterLocation() {
     if (!token || !selectedLocation) return;
-    await apiRequest(`/locations/${selectedLocation}/enter`, "POST", {}, token);
-    const refreshed = await apiRequest<Character | null>("/characters/me", "GET", undefined, token);
-    setCharacter(refreshed);
+    setError("");
+    try {
+      await apiRequest(`/locations/${selectedLocation}/enter`, "POST", {}, token);
+      const refreshed = await apiRequest<Character | null>("/characters/me", "GET", undefined, token);
+      setCharacter(refreshed);
+    } catch (err) {
+      setError(getErrorMessage(err));
+    }
   }
 
   async function leaveLocation() {
     if (!token || !currentLocation) return;
-    await apiRequest(`/locations/${currentLocation.id}/leave`, "POST", {}, token);
-    const refreshed = await apiRequest<Character | null>("/characters/me", "GET", undefined, token);
-    setCharacter(refreshed);
+    setError("");
+    try {
+      await apiRequest(`/locations/${currentLocation.id}/leave`, "POST", {}, token);
+      const refreshed = await apiRequest<Character | null>("/characters/me", "GET", undefined, token);
+      setCharacter(refreshed);
+    } catch (err) {
+      setError(getErrorMessage(err));
+    }
   }
 
   async function sendSpeech() {
     if (!token || !currentLocation || !speech.trim()) return;
-    await apiRequest(`/locations/${currentLocation.id}/say`, "POST", { content: speech }, token);
-    setSpeech("");
-    const updated = await apiRequest<Message[]>(`/locations/${currentLocation.id}/messages`, "GET", undefined, token);
-    setMessages(updated);
+    setError("");
+    try {
+      await apiRequest(`/locations/${currentLocation.id}/say`, "POST", { content: speech }, token);
+      setSpeech("");
+      const updated = await apiRequest<Message[]>(`/locations/${currentLocation.id}/messages`, "GET", undefined, token);
+      setMessages(updated);
+    } catch (err) {
+      setError(getErrorMessage(err));
+    }
   }
 
   async function doAction(action: string) {
     if (!token || !currentLocation) return;
-    await apiRequest(`/locations/${currentLocation.id}/action`, "POST", { action }, token);
-    const updated = await apiRequest<Message[]>(`/locations/${currentLocation.id}/messages`, "GET", undefined, token);
-    setMessages(updated);
+    setError("");
+    try {
+      await apiRequest(`/locations/${currentLocation.id}/action`, "POST", { action }, token);
+      const updated = await apiRequest<Message[]>(`/locations/${currentLocation.id}/messages`, "GET", undefined, token);
+      setMessages(updated);
+    } catch (err) {
+      setError(getErrorMessage(err));
+    }
   }
 
   async function markDead() {
     if (!token || !character) return;
-    await apiRequest(`/characters/${character.id}/mark-dead`, "POST", { reason: "Evento crítico de RP" }, token);
-    const [activeCharacter, history] = await Promise.all([
-      apiRequest<Character | null>("/characters/me", "GET", undefined, token),
-      apiRequest<Character[]>("/characters/history", "GET", undefined, token)
-    ]);
-    setCharacter(activeCharacter);
-    setDeadHistory(history);
+    setError("");
+    try {
+      await apiRequest(`/characters/${character.id}/mark-dead`, "POST", { reason: "Evento crítico de RP" }, token);
+      const [activeCharacter, history] = await Promise.all([
+        apiRequest<Character | null>("/characters/me", "GET", undefined, token),
+        apiRequest<Character[]>("/characters/history", "GET", undefined, token)
+      ]);
+      setCharacter(activeCharacter);
+      setDeadHistory(history);
+    } catch (err) {
+      setError(getErrorMessage(err));
+    }
   }
 
   if (!token) {
@@ -241,7 +284,11 @@ export function App() {
               <p>Status: {character.lifeStatus === "alive" ? "Vivo" : "Morto"}</p>
               <p>Dinheiro em mãos: R$ {character.moneyCash}</p>
               <p>Risco atual: {currentLocation?.riskLevel ?? "LOW"}</p>
-              <button className="danger" onClick={markDead}>Marcar morte permanente (teste)</button>
+              {import.meta.env.DEV && (
+                <button className="danger" onClick={markDead}>
+                  Marcar morte permanente (teste)
+                </button>
+              )}
             </section>
           )}
 
