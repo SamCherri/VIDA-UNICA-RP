@@ -7,6 +7,16 @@ import { requireAuth } from "../middleware/auth.js";
 import { logAction } from "../services/log.service.js";
 
 const professionSchema = z.enum(PROFESSIONS);
+const DEFAULT_PROFESSION = "Desempregado";
+
+function sanitizeProfession(profession?: string) {
+  if (!profession?.trim()) {
+    return DEFAULT_PROFESSION;
+  }
+
+  const parsedProfession = professionSchema.safeParse(profession);
+  return parsedProfession.success ? parsedProfession.data : DEFAULT_PROFESSION;
+}
 
 export async function characterRoutes(app: FastifyInstance) {
   app.post("/characters", { preHandler: [requireAuth] }, async (request, reply) => {
@@ -19,6 +29,7 @@ export async function characterRoutes(app: FastifyInstance) {
         profession: z.string().max(80).optional()
       })
       .parse(request.body);
+    const safeProfession = sanitizeProfession(body.profession);
 
     const defaultLocation = await prisma.location.findFirst({ where: { name: "Praça Central" } });
 
@@ -38,6 +49,7 @@ export async function characterRoutes(app: FastifyInstance) {
             data: {
               userId: request.authUser.id,
               ...body,
+              profession: safeProfession,
               currentLocationId: defaultLocation?.id,
               moneyCash: 500,
               bankAccount: { create: { balance: 500 } }

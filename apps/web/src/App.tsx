@@ -50,7 +50,13 @@ export function App() {
   const [loginForm, setLoginForm] = useState({ login: "", password: "" });
   const [registerForm, setRegisterForm] = useState({ username: "", email: "", password: "" });
   const [showRegister, setShowRegister] = useState(false);
-  const [charForm, setCharForm] = useState({ name: "", age: 18, story: "", appearance: "", profession: "" });
+  const [charForm, setCharForm] = useState<{ name: string; age: number; story: string; appearance: string; profession: Profession }>({
+    name: "",
+    age: 18,
+    story: "",
+    appearance: "",
+    profession: DEFAULT_PROFESSION
+  });
   const [speech, setSpeech] = useState("");
   const [selectedProfession, setSelectedProfession] = useState<Profession>(DEFAULT_PROFESSION);
   const [isSavingProfession, setIsSavingProfession] = useState(false);
@@ -335,11 +341,13 @@ export function App() {
             placeholder="Idade"
             onChange={(e) => setCharForm({ ...charForm, age: Number(e.target.value) })}
           />
-          <input
-            value={charForm.profession}
-            placeholder="Profissão"
-            onChange={(e) => setCharForm({ ...charForm, profession: e.target.value })}
-          />
+          <select value={charForm.profession} onChange={(e) => setCharForm({ ...charForm, profession: e.target.value as Profession })}>
+            {PROFESSIONS.map((profession) => (
+              <option key={profession} value={profession}>
+                {profession}
+              </option>
+            ))}
+          </select>
           <textarea value={charForm.story} placeholder="História" onChange={(e) => setCharForm({ ...charForm, story: e.target.value })} />
           <button onClick={createCharacter}>Criar personagem</button>
 
