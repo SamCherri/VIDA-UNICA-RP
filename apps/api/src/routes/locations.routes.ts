@@ -4,6 +4,10 @@ import { z } from "zod";
 import { prisma } from "../lib/prisma.js";
 import { requireAuth } from "../middleware/auth.js";
 import { logAction } from "../services/log.service.js";
+import { assertCooldown } from "../lib/cooldown.js";
+
+const SAY_COOLDOWN_MS = 2500;
+const ACTION_COOLDOWN_MS = 2000;
 
 const sceneActionSchema = z.enum([
   "Conversar",
@@ -123,6 +127,15 @@ export async function locationRoutes(app: FastifyInstance) {
   app.post("/locations/:id/say", { preHandler: [requireAuth] }, async (request, reply) => {
     const { id } = z.object({ id: z.string().cuid() }).parse(request.params);
     const body = z.object({ content: z.string().min(1).max(240) }).parse(request.body);
+
+    const cooldown = assertCooldown(`say:${request.authUser.id}:${id}`, SAY_COOLDOWN_MS);
+    if (cooldown.blocked) {
+      return reply
+        .code(429)
+        .header("Retry-After", cooldown.retryAfterSeconds)
+        .send({ message: "Você está falando rápido demais. Aguarde alguns segundos." });
+    }
+
     const character = await getAliveCharacter(request.authUser.id);
 
     if (!character || character.currentLocationId !== id) {
@@ -152,6 +165,15 @@ export async function locationRoutes(app: FastifyInstance) {
   app.post("/locations/:id/action", { preHandler: [requireAuth] }, async (request, reply) => {
     const { id } = z.object({ id: z.string().cuid() }).parse(request.params);
     const body = z.object({ action: sceneActionSchema }).parse(request.body);
+
+    const cooldown = assertCooldown(`action:${request.authUser.id}:${id}`, ACTION_COOLDOWN_MS);
+    if (cooldown.blocked) {
+      return reply
+        .code(429)
+        .header("Retry-After", cooldown.retryAfterSeconds)
+        .send({ message: "Ação executada rápido demais. Aguarde para tentar novamente." });
+    }
+
     const character = await getAliveCharacter(request.authUser.id);
 
     if (!character || character.currentLocationId !== id) {

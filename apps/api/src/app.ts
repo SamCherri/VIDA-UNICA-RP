@@ -2,6 +2,7 @@ import Fastify from "fastify";
 import cors from "@fastify/cors";
 import jwt from "@fastify/jwt";
 import sensible from "@fastify/sensible";
+import { ZodError } from "zod";
 import { env } from "./config/env.js";
 import { authRoutes } from "./routes/auth.routes.js";
 import { characterRoutes } from "./routes/characters.routes.js";
@@ -15,6 +16,26 @@ export async function buildApp() {
   await app.register(sensible);
   await app.register(cors, { origin: env.WEB_ORIGIN });
   await app.register(jwt, { secret: env.JWT_SECRET });
+
+  app.setErrorHandler((error, request, reply) => {
+    if (error instanceof ZodError) {
+      return reply.code(400).send({
+        message: "Dados inválidos.",
+        issues: error.issues.map((issue) => ({ path: issue.path.join("."), message: issue.message }))
+      });
+    }
+
+    request.log.error(error);
+
+    if (env.NODE_ENV === "production") {
+      return reply.code(500).send({ message: "Erro interno no servidor." });
+    }
+
+    return reply.code(500).send({
+      message: "Erro interno no servidor.",
+      detail: error instanceof Error ? error.message : "Erro desconhecido"
+    });
+  });
 
   app.get("/health", async () => ({ ok: true }));
 

@@ -60,6 +60,13 @@ npm install
 
 ## Variáveis de ambiente
 
+
+## Status de branch antes do deploy
+
+- A branch de correções precisa ser **mesclada na `main`** antes de qualquer deploy no Railway.
+- O fluxo recomendado é: validar build + migrations nesta branch corrigida -> merge para `main` -> deploy.
+
+
 > Em produção (Railway), configure direto no painel do serviço.
 
 ### API (`apps/api`)
@@ -70,6 +77,8 @@ npm install
 - `PORT` (opcional, padrão 3333)
 - `ADMIN_EMAIL` (opcional para seed)
 - `ADMIN_PASSWORD` (opcional para seed)
+
+> Variáveis mínimas de produção no Railway: `DATABASE_URL`, `JWT_SECRET`, `WEB_ORIGIN` e `VITE_API_URL`.
 
 ### Web (`apps/web`)
 
@@ -89,7 +98,7 @@ Criar migração local:
 npm run prisma:migrate -- --name init
 ```
 
-Aplicar migrações em produção:
+Aplicar migrações em produção (depende da pasta `prisma/migrations` versionada no repositório):
 
 ```bash
 npm run prisma:deploy

@@ -1,4 +1,4 @@
-import { CharacterLifeStatus } from "@prisma/client";
+import { CharacterLifeStatus, Prisma } from "@prisma/client";
 import type { FastifyInstance } from "fastify";
 import { z } from "zod";
 import { prisma } from "../lib/prisma.js";
@@ -17,35 +17,53 @@ export async function characterRoutes(app: FastifyInstance) {
       })
       .parse(request.body);
 
-    const aliveCharacter = await prisma.character.findFirst({
-      where: { userId: request.authUser.id, lifeStatus: CharacterLifeStatus.alive }
-    });
-
-    if (aliveCharacter) {
-      return reply.code(409).send({ message: "Você já possui um personagem vivo." });
-    }
-
     const defaultLocation = await prisma.location.findFirst({ where: { name: "Praça Central" } });
 
-    const character = await prisma.character.create({
-      data: {
+    try {
+      const character = await prisma.$transaction(
+        async (tx) => {
+          const aliveCharacter = await tx.character.findFirst({
+            where: { userId: request.authUser.id, lifeStatus: CharacterLifeStatus.alive },
+            select: { id: true }
+          });
+
+          if (aliveCharacter) {
+            throw new Error("ALIVE_CHARACTER_EXISTS");
+          }
+
+          return tx.character.create({
+            data: {
+              userId: request.authUser.id,
+              ...body,
+              currentLocationId: defaultLocation?.id,
+              moneyCash: 500,
+              bankAccount: { create: { balance: 500 } }
+            }
+          });
+        },
+        { isolationLevel: Prisma.TransactionIsolationLevel.Serializable }
+      );
+
+      await logAction({
         userId: request.authUser.id,
-        ...body,
-        currentLocationId: defaultLocation?.id,
-        moneyCash: 500,
-        bankAccount: { create: { balance: 500 } }
+        characterId: character.id,
+        locationId: character.currentLocationId ?? undefined,
+        actionType: "character_create",
+        description: `${character.name} foi criado`
+      });
+
+      return reply.code(201).send(character);
+    } catch (error) {
+      if (error instanceof Error && error.message === "ALIVE_CHARACTER_EXISTS") {
+        return reply.code(409).send({ message: "Você já possui um personagem vivo." });
       }
-    });
 
-    await logAction({
-      userId: request.authUser.id,
-      characterId: character.id,
-      locationId: character.currentLocationId ?? undefined,
-      actionType: "character_create",
-      description: `${character.name} foi criado`
-    });
+      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") {
+        return reply.code(409).send({ message: "Você já possui um personagem vivo." });
+      }
 
-    return reply.code(201).send(character);
+      throw error;
+    }
   });
 
   app.get("/characters/me", { preHandler: [requireAuth] }, async (request) => {
@@ -78,17 +96,30 @@ export async function characterRoutes(app: FastifyInstance) {
       return reply.code(409).send({ message: "Personagem já está morto." });
     }
 
-    const updated = await prisma.character.update({
-      where: { id: character.id },
-      data: {
-        lifeStatus: CharacterLifeStatus.dead,
-        deathAt: new Date(),
-        deathReason: body.reason,
-        moneyCash: 0,
-        currentLocationId: null,
-        bankAccount: { update: { balance: 0 } },
-        deathRecord: { create: { reason: body.reason } }
-      }
+    const updated = await prisma.$transaction(async (tx) => {
+      const deadCharacter = await tx.character.update({
+        where: { id: character.id },
+        data: {
+          lifeStatus: CharacterLifeStatus.dead,
+          deathAt: new Date(),
+          deathReason: body.reason,
+          moneyCash: 0,
+          currentLocationId: null
+        }
+      });
+
+      await tx.bankAccount.updateMany({
+        where: { characterId: character.id },
+        data: { balance: 0 }
+      });
+
+      await tx.deathRecord.upsert({
+        where: { characterId: character.id },
+        update: { reason: body.reason },
+        create: { characterId: character.id, reason: body.reason }
+      });
+
+      return deadCharacter;
     });
 
     await logAction({
