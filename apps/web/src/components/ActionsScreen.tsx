@@ -17,7 +17,7 @@ function mapBasicCategory(action: string) {
   return "comum";
 }
 
-const groupOrder = ["comum", "profissão", "hospital", "banco", "segurança", "polícia"] as const;
+const groupOrder = ["comum", "hospital", "banco", "segurança", "polícia"] as const;
 
 export function ActionsScreen({
   actions,
@@ -26,8 +26,6 @@ export function ActionsScreen({
   onAction,
   onProfessionalAction
 }: ActionsScreenProps) {
-  const professionOnlyActions = professionalActions.filter((action) => action.category !== "Comum");
-
   const basicGroups = actions.reduce<Record<string, string[]>>((acc, action) => {
     const group = mapBasicCategory(action);
     acc[group] = [...(acc[group] ?? []), action];
@@ -35,6 +33,7 @@ export function ActionsScreen({
   }, {});
 
   const professionalGroups = professionalActions.reduce<Record<string, AvailableSceneAction[]>>((acc, action) => {
+    if (action.category === "Comum") return acc;
     const group = action.category.toLowerCase();
     acc[group] = [...(acc[group] ?? []), action];
     return acc;
@@ -49,8 +48,8 @@ export function ActionsScreen({
 
       {groupOrder.map((group) => {
         const groupedBasic = basicGroups[group] ?? [];
-        const groupedProfessional = group === "profissão" ? professionOnlyActions : professionalGroups[group] ?? [];
-        const noLocationText = group === "profissão" ? "Entre em um local para ver ações profissionais." : "Entre em um local para liberar ações deste grupo.";
+        const groupedProfessional = professionalGroups[group] ?? [];
+        const noLocationText = "Entre em um local para liberar ações deste grupo.";
 
         return (
           <div key={group} className="action-group">
