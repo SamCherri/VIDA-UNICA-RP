@@ -1,3 +1,8 @@
+NOTA DE SPRINT (2026-04-25):
+- Base de rotina implementada com fome, sede, sono e energia (lazy update por interação).
+- Ações iniciais: Comer, Beber água, Descansar e Trabalhar (salário básico por profissão).
+- Sem morte por necessidades e sem sistema avançado de empresas nesta fase.
+====================================================================
 PROJETO: VIDA ÚNICA RP
 TIPO: Simulador de vida RP online, mobile-first, instalável como jogo no celular, com cidade viva, profissões, rotina, decisões e consequências.
 ====================================================================

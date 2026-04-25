@@ -630,3 +630,55 @@ button.danger {
 .life-info-card strong {
   color: #edf3ff;
 }
+
+.msg-routine {
+  border-left: 3px solid #6ec3ff;
+}
+
+.msg-work {
+  border-left: 3px solid #e7c66d;
+}
+
+.now-routine-card {
+  margin: 10px 0;
+  padding: 10px;
+  border: 1px solid #2b384d;
+  border-radius: 12px;
+  background: #0f1725;
+}
+
+.routine-bars {
+  display: grid;
+  gap: 8px;
+}
+
+.routine-row-label {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+  margin-bottom: 4px;
+}
+
+.routine-bar-track {
+  height: 7px;
+  border-radius: 999px;
+  background: #2b3546;
+  overflow: hidden;
+}
+
+.routine-bar-fill {
+  height: 100%;
+  border-radius: 999px;
+}
+
+.routine-good {
+  background: #57c98f;
+}
+
+.routine-warning {
+  background: #ffbf5a;
+}
+
+.routine-critical {
+  background: #ff6f84;
+}

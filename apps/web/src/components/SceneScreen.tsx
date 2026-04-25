@@ -1,5 +1,6 @@
 import { useMemo, useRef } from "react";
 import type { AvailableSceneAction, RiskLevel } from "@vida-unica/shared";
+import type { RoutinePayload } from "../api/client";
 import { PresencePanel, type PresenceCharacter } from "./PresencePanel";
 
 type Message = { id: string; messageType: string; content: string; character?: { name: string } | null; createdAt: string };
@@ -9,6 +10,8 @@ type SceneScreenProps = {
   profession?: string;
   moneyCash: number;
   riskLevel?: RiskLevel;
+  routine: RoutinePayload | null;
+  isInLocation: boolean;
   messages: Message[];
   presence: PresenceCharacter[];
   speech: string;
@@ -20,6 +23,7 @@ type SceneScreenProps = {
   onSendSpeech: () => void;
   onQuickAction: (action: string) => void;
   onProfessionalAction: (actionId: string) => void;
+  onRoutineAction: (action: "eat" | "drink" | "rest" | "work") => void;
   onLeaveLocation: () => void;
   onGoToCity: () => void;
 };
@@ -43,6 +47,12 @@ const riskSituation: Record<RiskLevel, string> = {
 
 function messageTypeMeta(messageType: string) {
   const type = messageType.toLowerCase();
+  if (type.includes("work")) {
+    return { icon: "💼", title: "Trabalho", cssClass: "msg-work" };
+  }
+  if (type.includes("routine")) {
+    return { icon: "🧭", title: "Rotina", cssClass: "msg-routine" };
+  }
   if (type.includes("professional") || type.includes("prof")) {
     return { icon: "👔", title: "Trabalho", cssClass: "msg-professional" };
   }
@@ -82,11 +92,19 @@ function groupConsecutiveMessages(messages: Message[]) {
   return grouped;
 }
 
+function routineStatusClass(value: number) {
+  if (value > 60) return "routine-good";
+  if (value >= 30) return "routine-warning";
+  return "routine-critical";
+}
+
 export function SceneScreen({
   locationName,
   profession,
   moneyCash,
   riskLevel,
+  routine,
+  isInLocation,
   messages,
   presence,
   speech,
@@ -98,6 +116,7 @@ export function SceneScreen({
   onSendSpeech,
   onQuickAction,
   onProfessionalAction,
+  onRoutineAction,
   onLeaveLocation,
   onGoToCity
 }: SceneScreenProps) {
@@ -128,6 +147,8 @@ export function SceneScreen({
     speechRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
   }
 
+  const showWork = (profession ?? "Desempregado") !== "Desempregado";
+
   return (
     <section className="card now-screen">
       <h3>Agora</h3>
@@ -147,6 +168,32 @@ export function SceneScreen({
         </div>
       </article>
 
+      <article className="now-routine-card">
+        <h4>Minha rotina</h4>
+        {!routine ? (
+          <small>Entre em um local para atualizar sua rotina.</small>
+        ) : (
+          <div className="routine-bars">
+            {[
+              { label: "Fome", value: routine.hunger },
+              { label: "Sede", value: routine.thirst },
+              { label: "Sono", value: routine.sleep },
+              { label: "Energia", value: routine.energy }
+            ].map((item) => (
+              <div key={item.label} className="routine-row">
+                <div className="routine-row-label">
+                  <span>{item.label}</span>
+                  <strong>{item.value}%</strong>
+                </div>
+                <div className="routine-bar-track">
+                  <div className={`routine-bar-fill ${routineStatusClass(item.value)}`} style={{ width: `${item.value}%` }} />
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </article>
+
       <article className="now-situation-card">
         <h4>Situação do local</h4>
         <p>{situation}</p>
@@ -162,6 +209,25 @@ export function SceneScreen({
           <button className="ghost" onClick={onLeaveLocation}>
             Sair do local
           </button>
+
+          {isInLocation && (
+            <>
+              <button className="ghost" onClick={() => onRoutineAction("eat")}>Comer</button>
+              <button className="ghost" onClick={() => onRoutineAction("drink")}>Beber água</button>
+              <button className="ghost" onClick={() => onRoutineAction("rest")}>Descansar</button>
+              {showWork && (
+                <button
+                  className="ghost"
+                  disabled={routine ? !routine.canWork : false}
+                  title={routine && !routine.canWork ? "Você está em condição ruim para trabalhar. Cuide da sua vida antes." : undefined}
+                  onClick={() => onRoutineAction("work")}
+                >
+                  {routine && !routine.canWork ? "Trabalhar (bloqueado)" : "Trabalhar"}
+                </button>
+              )}
+            </>
+          )}
+
           {quickProfessionalActions.map((action) => (
             <button key={action.id} className="ghost" onClick={() => onProfessionalAction(action.id)}>
               {action.label}

@@ -57,6 +57,13 @@ model Character {
   isFrozen          Boolean             @default(false)
   currentLocationId String?
   moneyCash         Int                 @default(0)
+  hunger            Int                 @default(80)
+  thirst            Int                 @default(80)
+  sleep             Int                 @default(80)
+  energy            Int                 @default(80)
+  routineUpdatedAt  DateTime            @default(now())
+  lastWorkAt        DateTime?
+  workStreak        Int                 @default(0)
   createdAt         DateTime            @default(now())
   updatedAt         DateTime            @updatedAt
   deathAt           DateTime?
