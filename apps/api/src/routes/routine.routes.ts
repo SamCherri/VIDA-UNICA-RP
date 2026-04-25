@@ -195,27 +195,21 @@ export async function routineRoutes(app: FastifyInstance) {
     }
 
     const result = await prisma.$transaction(async (tx) => {
-      const currentCharacter = await tx.character.findUnique({
-        where: { id: character.id }
-      });
-
-      if (!currentCharacter) {
-        return { blocked: true as const };
-      }
-
-      const decayed = await applyRoutineDecay(currentCharacter, (id, data) => tx.character.update({ where: { id }, data }));
+      const decayed = await applyRoutineDecay(character, (id, data) => tx.character.update({ where: { id }, data }));
 
       if (!canCharacterWork(decayed)) {
         return { blocked: true as const };
       }
 
-      const now = new Date();
-      const cooldownCutoff = new Date(now.getTime() - WORK_COOLDOWN_MS);
-      const updateWorkResult = await tx.character.updateMany({
-        where: {
-          id: decayed.id,
-          OR: [{ lastWorkAt: null }, { lastWorkAt: { lte: cooldownCutoff } }]
-        },
+      if (decayed.lastWorkAt) {
+        const cooldownRemainingMs = WORK_COOLDOWN_MS - (Date.now() - decayed.lastWorkAt.getTime());
+        if (cooldownRemainingMs > 0) {
+          return { blocked: true as const, cooldownRemainingMs };
+        }
+      }
+
+      const updatedCharacter = await tx.character.update({
+        where: { id: decayed.id },
         data: {
           hunger: Math.max(0, decayed.hunger - 10),
           thirst: Math.max(0, decayed.thirst - 12),
@@ -223,30 +217,10 @@ export async function routineRoutes(app: FastifyInstance) {
           energy: Math.max(0, decayed.energy - 15),
           moneyCash: { increment: salary },
           workStreak: { increment: 1 },
-          lastWorkAt: now,
-          routineUpdatedAt: now
+          lastWorkAt: new Date(),
+          routineUpdatedAt: new Date()
         }
       });
-
-      if (updateWorkResult.count === 0) {
-        const latestCharacter = await tx.character.findUnique({
-          where: { id: decayed.id },
-          select: { lastWorkAt: true }
-        });
-        const cooldownRemainingMs = latestCharacter?.lastWorkAt
-          ? WORK_COOLDOWN_MS - (now.getTime() - latestCharacter.lastWorkAt.getTime())
-          : WORK_COOLDOWN_MS;
-
-        return { blocked: true as const, cooldownRemainingMs: Math.max(0, cooldownRemainingMs) };
-      }
-
-      const updatedCharacter = await tx.character.findUnique({
-        where: { id: decayed.id }
-      });
-
-      if (!updatedCharacter) {
-        return { blocked: true as const };
-      }
 
       const message = `${updatedCharacter.name} trabalhou como ${updatedCharacter.profession ?? "Desempregado"} e recebeu R$ ${salary}.`;
 
