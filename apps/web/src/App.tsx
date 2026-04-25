@@ -57,18 +57,22 @@ export function App() {
   );
 
   async function refreshSceneData(authToken: string, locationId: string, silent = true) {
-    try {
-      const [updatedMessages, updatedPresence] = await Promise.all([
-        apiRequest<Message[]>(`/locations/${locationId}/messages`, "GET", undefined, authToken),
-        apiRequest<PresenceCharacter[]>(`/locations/${locationId}/presence`, "GET", undefined, authToken)
-      ]);
-      setMessages(updatedMessages);
-      setPresence(updatedPresence);
+    const [messagesResult, presenceResult] = await Promise.allSettled([
+      apiRequest<Message[]>(`/locations/${locationId}/messages`, "GET", undefined, authToken),
+      apiRequest<PresenceCharacter[]>(`/locations/${locationId}/presence`, "GET", undefined, authToken)
+    ]);
+
+    if (messagesResult.status === "fulfilled") {
+      setMessages(messagesResult.value);
       setSceneUpdatedAt(new Date());
-    } catch (err) {
-      if (!silent) {
-        setError(getErrorMessage(err));
-      }
+    } else if (!silent) {
+      setError(getErrorMessage(messagesResult.reason));
+    }
+
+    if (presenceResult.status === "fulfilled") {
+      setPresence(presenceResult.value);
+    } else if (!silent && messagesResult.status !== "rejected") {
+      setError(getErrorMessage(presenceResult.reason));
     }
   }
 
