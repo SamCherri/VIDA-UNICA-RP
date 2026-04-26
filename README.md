@@ -266,6 +266,12 @@ O jogo agora possui uma base real de rotina do personagem:
 - **decaimento por tempo real** usando *lazy update* (sem cron externo);
 - ações manuais: **Comer**, **Beber água**, **Descansar** e **Trabalhar**;
 - trabalho com salário básico por profissão (Atendente do Hospital, Caixa de Banco, Segurança e Policial);
+- **trabalho por local/profissão**:
+  - Atendente do Hospital trabalha no **Hospital**;
+  - Caixa de Banco trabalha no **Banco Central**;
+  - Segurança trabalha no **Banco Central**;
+  - Policial trabalha na **Delegacia**, **Praça Central** e **Beco Industrial**;
+  - Desempregado não possui trabalho fixo;
 - bloqueio leve de trabalho quando a condição de vida está crítica;
 - logs e mensagens de rotina/trabalho dentro do local atual.
 
