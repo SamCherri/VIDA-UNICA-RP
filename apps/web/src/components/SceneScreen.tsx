@@ -147,7 +147,21 @@ export function SceneScreen({
     speechRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
   }
 
-  const showWork = (profession ?? "Desempregado") !== "Desempregado";
+  const isUnemployed = (profession ?? "Desempregado") === "Desempregado";
+  const showWork = !isUnemployed;
+  const isCriticalForWork = routine ? !routine.canWork : false;
+  const isWrongLocationForWork = routine ? !routine.workAvailableHere : false;
+  const isWorkButtonDisabled = isCriticalForWork || isWrongLocationForWork;
+  const workButtonLabel = isCriticalForWork
+    ? "Trabalhar (bloqueado)"
+    : isWrongLocationForWork
+      ? "Trabalho indisponível aqui"
+      : "Trabalhar";
+  const workButtonTitle = isCriticalForWork
+    ? "Você está em condição ruim para trabalhar. Cuide da sua vida antes."
+    : isWrongLocationForWork
+      ? routine?.workLocationMessage
+      : undefined;
 
   return (
     <section className="card now-screen">
@@ -216,14 +230,19 @@ export function SceneScreen({
               <button className="ghost" onClick={() => onRoutineAction("drink")}>Beber água</button>
               <button className="ghost" onClick={() => onRoutineAction("rest")}>Descansar</button>
               {showWork && (
-                <button
-                  className="ghost"
-                  disabled={routine ? !routine.canWork : false}
-                  title={routine && !routine.canWork ? "Você está em condição ruim para trabalhar. Cuide da sua vida antes." : undefined}
-                  onClick={() => onRoutineAction("work")}
-                >
-                  {routine && !routine.canWork ? "Trabalhar (bloqueado)" : "Trabalhar"}
-                </button>
+                <>
+                  <button
+                    className="ghost"
+                    disabled={routine ? isWorkButtonDisabled : false}
+                    title={routine ? workButtonTitle : undefined}
+                    onClick={() => onRoutineAction("work")}
+                  >
+                    {workButtonLabel}
+                  </button>
+                  {routine && isWrongLocationForWork && !isCriticalForWork && (
+                    <small>{routine.workLocationMessage}</small>
+                  )}
+                </>
               )}
             </>
           )}

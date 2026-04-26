@@ -40,10 +40,17 @@ export function CharacterScreen({
   canMarkDead,
   onMarkDead
 }: CharacterScreenProps) {
+  const currentProfession = character.profession ?? "Desempregado";
+  const workLocationsText = !routine
+    ? "Entre em um local para atualizar os dados de trabalho."
+    : routine.allowedWorkLocations.length === 0
+      ? "Você ainda não possui trabalho fixo."
+      : `Locais de trabalho: ${routine.allowedWorkLocations.join(", ")}`;
+
   const infoCards = [
     { label: "Nome", value: character.name },
     { label: "Idade", value: `${character.age} anos` },
-    { label: "Profissão", value: character.profession ?? "Desempregado" },
+    { label: "Profissão", value: currentProfession },
     { label: "Dinheiro", value: `R$ ${character.moneyCash}` },
     { label: "Local atual", value: currentLocationName ?? "Nenhum" },
     { label: "Risco atual", value: currentRiskLevel ?? "LOW", isRisk: true },
@@ -122,6 +129,11 @@ export function CharacterScreen({
 
       <h4>Profissão atual</h4>
       <p className="section-subtitle">Nesta fase, a troca de profissão é livre para testes.</p>
+      <article className="life-info-card">
+        <small>Profissão</small>
+        <strong>{currentProfession}</strong>
+        <small>{workLocationsText}</small>
+      </article>
       <select value={selectedProfession} onChange={(e) => onProfessionChange(e.target.value as Profession)}>
         {professions.map((profession) => (
           <option key={profession} value={profession}>

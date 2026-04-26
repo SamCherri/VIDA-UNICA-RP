@@ -12,6 +12,9 @@ export type RoutinePayload = {
   workStreak: number;
   statusLabels: string[];
   canWork: boolean;
+  workAvailableHere: boolean;
+  workLocationMessage: string;
+  allowedWorkLocations: string[];
 };
 
 export async function apiRequest<T>(path: string, method: HttpMethod, body?: unknown, token?: string): Promise<T> {

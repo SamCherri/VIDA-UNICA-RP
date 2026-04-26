@@ -1,6 +1,7 @@
 NOTA DE SPRINT (2026-04-25):
 - Base de rotina implementada com fome, sede, sono e energia (lazy update por interação).
 - Ações iniciais: Comer, Beber água, Descansar e Trabalhar (salário básico por profissão).
+- Trabalho agora respeita local + profissão (ex.: Caixa de Banco somente no Banco Central).
 - Sem morte por necessidades e sem sistema avançado de empresas nesta fase.
 ====================================================================
 PROJETO: VIDA ÚNICA RP

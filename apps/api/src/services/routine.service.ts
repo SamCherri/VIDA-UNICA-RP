@@ -21,6 +21,14 @@ export const WORK_SALARY_BY_PROFESSION: Record<Profession, number> = {
   Policial: 150
 };
 
+export const WORK_LOCATIONS_BY_PROFESSION: Record<Profession, string[]> = {
+  Desempregado: [],
+  "Atendente do Hospital": ["Hospital"],
+  "Caixa de Banco": ["Banco Central"],
+  Segurança: ["Banco Central"],
+  Policial: ["Delegacia", "Praça Central", "Beco Industrial"]
+};
+
 const professionSchema = z.enum(PROFESSIONS);
 
 type RoutineCharacter = Pick<
@@ -93,7 +101,54 @@ export function getWorkSalary(profession?: string | null) {
   return WORK_SALARY_BY_PROFESSION[safeProfession];
 }
 
-export function buildRoutinePayload(character: RoutineCharacter) {
+export function getWorkLocationRule(profession?: string | null) {
+  const parsed = professionSchema.safeParse(profession);
+  const safeProfession = parsed.success ? parsed.data : "Desempregado";
+  const allowedLocations = WORK_LOCATIONS_BY_PROFESSION[safeProfession];
+
+  return {
+    profession: safeProfession,
+    allowedLocations
+  };
+}
+
+export function canWorkAtLocation(profession?: string | null, locationName?: string | null) {
+  const { profession: safeProfession, allowedLocations } = getWorkLocationRule(profession);
+
+  if (allowedLocations.length === 0) {
+    return {
+      canWork: false,
+      allowedLocations,
+      message: "Escolha uma profissão para trabalhar."
+    };
+  }
+
+  if (!locationName) {
+    return {
+      canWork: false,
+      allowedLocations,
+      message: "Você precisa estar em um local para trabalhar."
+    };
+  }
+
+  if (!allowedLocations.includes(locationName)) {
+    return {
+      canWork: false,
+      allowedLocations,
+      message: `Você não pode trabalhar como ${safeProfession} neste local. Vá até ${allowedLocations.join(", ")}.`
+    };
+  }
+
+  return {
+    canWork: true,
+    allowedLocations,
+    message: `Você pode trabalhar aqui como ${safeProfession}.`
+  };
+}
+
+export function buildRoutinePayload(character: RoutineCharacter, locationName?: string | null) {
+  const workLocationRule = canWorkAtLocation(character.profession, locationName);
+
   return {
     hunger: character.hunger,
     thirst: character.thirst,
@@ -103,6 +158,9 @@ export function buildRoutinePayload(character: RoutineCharacter) {
     lastWorkAt: character.lastWorkAt,
     workStreak: character.workStreak,
     statusLabels: getRoutineStatusLabels(character),
-    canWork: canCharacterWork(character)
+    canWork: canCharacterWork(character),
+    workAvailableHere: workLocationRule.canWork,
+    workLocationMessage: workLocationRule.message,
+    allowedWorkLocations: workLocationRule.allowedLocations
   };
 }

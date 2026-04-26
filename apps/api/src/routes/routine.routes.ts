@@ -5,6 +5,7 @@ import { requireAuth } from "../middleware/auth.js";
 import {
   applyRoutineDecay,
   buildRoutinePayload,
+  canWorkAtLocation,
   canCharacterWork,
   getWorkSalary,
   WORK_COOLDOWN_MS
@@ -18,6 +19,9 @@ async function getAliveCharacter(userId: string) {
       userId,
       lifeStatus: CharacterLifeStatus.alive,
       isFrozen: false
+    },
+    include: {
+      currentLocation: true
     }
   });
 }
@@ -56,7 +60,7 @@ export async function routineRoutes(app: FastifyInstance) {
 
     const updatedCharacter = await applyDecayWithDefaultClient(character);
 
-    return buildRoutinePayload(updatedCharacter);
+    return buildRoutinePayload(updatedCharacter, character.currentLocation?.name);
   });
 
   app.post("/routine/eat", { preHandler: [requireAuth] }, async (request, reply) => {
@@ -99,7 +103,7 @@ export async function routineRoutes(app: FastifyInstance) {
       return updatedCharacter;
     }, { isolationLevel: Prisma.TransactionIsolationLevel.Serializable });
 
-    return buildRoutinePayload(result);
+    return buildRoutinePayload(result, character.currentLocation?.name);
   });
 
   app.post("/routine/drink", { preHandler: [requireAuth] }, async (request, reply) => {
@@ -142,7 +146,7 @@ export async function routineRoutes(app: FastifyInstance) {
       return updatedCharacter;
     }, { isolationLevel: Prisma.TransactionIsolationLevel.Serializable });
 
-    return buildRoutinePayload(result);
+    return buildRoutinePayload(result, character.currentLocation?.name);
   });
 
   app.post("/routine/rest", { preHandler: [requireAuth] }, async (request, reply) => {
@@ -180,7 +184,7 @@ export async function routineRoutes(app: FastifyInstance) {
       return updatedCharacter;
     }, { isolationLevel: Prisma.TransactionIsolationLevel.Serializable });
 
-    return buildRoutinePayload(result);
+    return buildRoutinePayload(result, character.currentLocation?.name);
   });
 
   app.post("/routine/work", { preHandler: [requireAuth] }, async (request, reply) => {
@@ -191,7 +195,12 @@ export async function routineRoutes(app: FastifyInstance) {
 
     const salary = getWorkSalary(character.profession);
     if (salary <= 0) {
-      return reply.code(400).send({ message: "Sua profissão atual não permite trabalhar nesta ação." });
+      return reply.code(400).send({ message: "Sua profissão atual não possui trabalho disponível neste local." });
+    }
+
+    const locationRule = canWorkAtLocation(character.profession, character.currentLocation?.name);
+    if (!locationRule.canWork) {
+      return reply.code(400).send({ message: locationRule.message });
     }
 
     const result = await prisma.$transaction(async (tx) => {
@@ -222,7 +231,7 @@ export async function routineRoutes(app: FastifyInstance) {
         }
       });
 
-      const message = `${updatedCharacter.name} trabalhou como ${updatedCharacter.profession ?? "Desempregado"} e recebeu R$ ${salary}.`;
+      const message = `${updatedCharacter.name} trabalhou como ${updatedCharacter.profession ?? "Desempregado"} no ${character.currentLocation?.name ?? "local atual"} e recebeu R$ ${salary}.`;
 
       await createRoutineMessage(tx, updatedCharacter, message, "work");
 
@@ -253,6 +262,6 @@ export async function routineRoutes(app: FastifyInstance) {
       return reply.code(400).send({ message: BAD_WORK_CONDITION_MESSAGE });
     }
 
-    return buildRoutinePayload(result.character);
+    return buildRoutinePayload(result.character, character.currentLocation?.name);
   });
 }
